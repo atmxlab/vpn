@@ -1,0 +1,54 @@
+version: '3.9'
+
+networks:
+  client:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${CLIENT_NETWORK_SUBNET}
+          gateway: ${CLIENT_NETWORK_GATEWAY}
+  target:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${TARGET_NETWORK_SUBNET}
+          gateway: ${TARGET_NETWORK_GATEWAY}
+
+services:
+  client:
+    build:
+      dockerfile: Dockerfile
+      context: ./docker/go
+    privileged: true
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - .:/opt/app
+    networks:
+      client:
+        ipv4_address: ${CLIENT_IP_ADDRESS}
+
+  target:
+    build:
+      dockerfile: Dockerfile
+      context: ./docker/go
+    volumes:
+      - .:/opt/app
+    networks:
+      target:
+        ipv4_address: ${TARGET_IP_ADDRESS}
+
+  server:
+    build:
+      dockerfile: Dockerfile
+      context: ./docker/go
+    privileged: true
+    devices:
+      - /dev/net/tun:/dev/net/tun
+    volumes:
+      - .:/opt/app
+    networks:
+      client:
+        ipv4_address: ${SERVER_IP_ADDRESS_IN_CLIENT_NETWORK}
+      target:
+        ipv4_address: ${SERVER_IP_ADDRESS_IN_TARGET_NETWORK}
