@@ -6,8 +6,10 @@ package protocol
 type Flag byte
 
 const (
+	// FlagUNK - unknown - неизвестный флаг
+	FlagUNK Flag = iota
 	// FlagSYN - synchronize - установление соединения
-	FlagSYN Flag = iota
+	FlagSYN
 	// FlagFIN - finish -завершение соединения
 	FlagFIN
 	// FlagPSH -push - передача данных
@@ -22,4 +24,8 @@ func (f Flag) Is(ff Flag) bool {
 
 func (f Flag) Byte() byte {
 	return byte(f)
+}
+
+func Flags() []Flag {
+	return []Flag{FlagSYN, FlagFIN, FlagPSH, FlagKPA}
 }
