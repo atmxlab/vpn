@@ -32,3 +32,12 @@ up:
 
 down:
 	docker-compose down
+
+mockgen\:install:
+	go install github.com/golang/mock/mockgen@v1.6.0
+
+mockgen:
+	make mockgen:install
+
+	mockgen -source=internal/http/handler/auth.go -destination=internal/http/handler/mocks/auth.go -package=mockhandler
+	mockgen -source=internal/http/http.go -destination=internal/http/mocks/http.go -package=mockhttp
