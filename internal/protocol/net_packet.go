@@ -4,3 +4,7 @@ package protocol
 type TunPacket struct {
 	payload Payload
 }
+
+func NewTunPacket(payload Payload) *TunPacket {
+	return &TunPacket{payload: payload}
+}

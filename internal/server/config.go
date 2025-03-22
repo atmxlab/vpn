@@ -18,6 +18,6 @@ type Config struct {
 		// Из этой подсети будут выдаваться IP адреса клиентам
 		Subnet net.IPNet
 		// Maximum Transition Unit  - максимальная длина неделимого пакета
-		MTU int
+		MTU uint16
 	}
 }
