@@ -2,6 +2,7 @@ package auth
 
 import (
 	"context"
+
 	"github.com/atmxlab/vpn/internal/domain/dto/usecase"
 )
 

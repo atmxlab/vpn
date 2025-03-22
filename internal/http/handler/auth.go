@@ -3,13 +3,15 @@ package handler
 import (
 	"context"
 	"encoding/json"
-	"github.com/atmxlab/vpn/internal/domain/dto/usecase"
-	hhttp "github.com/atmxlab/vpn/internal/http"
 	"io"
 	"net"
 	"net/http"
+
+	"github.com/atmxlab/vpn/internal/domain/dto/usecase"
+	hhttp "github.com/atmxlab/vpn/internal/http"
 )
 
+//go:generate mock Usecase
 type Usecase interface {
 	Auth(ctx context.Context, options usecase.AuthOptions) (*usecase.AuthResult, error)
 }
@@ -30,6 +32,7 @@ type AuthRequest struct {
 func (a *Auth) Handle(w http.ResponseWriter, r *http.Request) {
 	ctx := context.Background()
 
+	// TODO: нужно проверить как это отработает если послать сюда ГБ, например
 	bytes, err := io.ReadAll(r.Body)
 	if err != nil {
 		hhttp.BadRequestError(w)

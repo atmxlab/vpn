@@ -3,16 +3,17 @@ package handler_test
 import (
 	"bytes"
 	"encoding/json"
-	"github.com/atmxlab/vpn/internal/domain/dto/usecase"
-	"github.com/atmxlab/vpn/internal/http/handler"
-	mockhandler "github.com/atmxlab/vpn/internal/http/handler/mocks"
-	mockhttp "github.com/atmxlab/vpn/internal/http/mocks"
-	"github.com/golang/mock/gomock"
-	"github.com/stretchr/testify/require"
 	"net"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/atmxlab/vpn/internal/domain/dto/usecase"
+	"github.com/atmxlab/vpn/internal/http/handler"
+	"github.com/atmxlab/vpn/internal/http/handler/mocks"
+	mockhttp "github.com/atmxlab/vpn/internal/http/mocks"
+	"github.com/golang/mock/gomock"
+	"github.com/stretchr/testify/require"
 )
 
 type HTTPTester struct {
@@ -55,7 +56,7 @@ func TestHandle(t *testing.T) {
 	tester := NewHTTPTester(t)
 	defer tester.Ctrl().Finish()
 
-	usecaseMock := mockhandler.NewMockUsecase(tester.Ctrl())
+	usecaseMock := mocks.NewMockUsecase(tester.Ctrl())
 
 	type body struct {
 		Key string `json:"key"`

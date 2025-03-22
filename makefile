@@ -7,7 +7,7 @@ TARGET_CMD_PATH = ./cmd/server/main.go
 # Targets
 
 test:
-	go test -failfast -fullpath -cover -race -timeout=$(if $(timeout), $(count), 5s) $(if $(count),-count=$(count)) $(if $(run),-run=$(run)) $(if $(package),$(package),./...)
+	go test -failfast -fullpath -cover -race -timeout=$(if $(timeout), $(count),5s) $(if $(count),-count=$(count)) $(if $(run),-run=$(run)) $(if $(package),$(package),./...)
 
 run\:server:
 	go run $(SERVER_CMD_PATH)
@@ -41,3 +41,6 @@ mockgen:
 
 	mockgen -source=internal/http/handler/auth.go -destination=internal/http/handler/mocks/auth.go -package=mockhandler
 	mockgen -source=internal/http/http.go -destination=internal/http/mocks/http.go -package=mockhttp
+
+generate:
+	go generate ./...

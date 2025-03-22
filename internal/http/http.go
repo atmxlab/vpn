@@ -1,15 +1,19 @@
 package http
 
 import (
-	"github.com/atmxlab/vpn/pkg/errors"
 	"net/http"
+
+	"github.com/atmxlab/vpn/pkg/errors"
 )
 
 // ResponseWriter need for mock
+//
+//go:generate mock ResponseWriter
 type ResponseWriter interface {
 	http.ResponseWriter
 }
 
+//go:generate mock Handler
 type Handler interface {
 	Pattern() string
 	Handle(writer http.ResponseWriter, request *http.Request)
