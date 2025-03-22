@@ -2,6 +2,7 @@ package server
 
 import "net"
 
+// PeerManager - управляющий пирами
 type PeerManager interface {
 	Add(peer *Peer) error
 	Remove(peer *Peer) error

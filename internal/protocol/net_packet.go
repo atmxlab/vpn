@@ -1,6 +1,6 @@
 package protocol
 
-// NetPacket - пакет, который передается по сети (не тоннель)
-type NetPacket struct {
+// TunPacket - пакет, который передается по сети (не тоннель)
+type TunPacket struct {
 	payload Payload
 }
