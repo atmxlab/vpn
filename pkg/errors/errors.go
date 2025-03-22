@@ -1,13 +1,9 @@
 package errors
 
-import (
-	"fmt"
+import "errors"
+
+var (
+	ErrInvalidArgument = errors.New("invalid argument")
+	ErrNotFound        = errors.New("not found")
+	ErrAlreadyExists   = errors.New("already exists")
 )
-
-func Wrap(err error, format string, a ...any) error {
-	return fmt.Errorf("%s: %w", fmt.Sprintf(format, a...), err)
-}
-
-func Fatalf(format string, a ...any) {
-	panic(fmt.Sprintf(format, a...))
-}
