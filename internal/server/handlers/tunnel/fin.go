@@ -15,9 +15,9 @@ type FINHandler struct {
 }
 
 func (h *FINHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
-	peer, exists, err := h.peerManager.FindByAddr(ctx, packet.Addr())
+	peer, exists, err := h.peerManager.GetByAddr(ctx, packet.Addr())
 	if err != nil {
-		return errors.Wrap(err, "peerManager.FindByAddr")
+		return errors.Wrap(err, "peerManager.GetByAddr")
 	}
 	if !exists {
 		return errors.Wrap(errors.ErrNotFound, "peer not found")

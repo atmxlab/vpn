@@ -32,12 +32,12 @@ func (h *Handler) Handle(
 		return errors.Wrap(err, "ipv4.ParseHeader")
 	}
 
-	peer, exists, err := h.peerManager.FindByDedicatedIP(ctx, header.Dst)
+	peer, exists, err := h.peerManager.GetByDedicatedIP(ctx, header.Dst)
 	if err != nil {
-		return errors.Wrap(err, "peerManager.FindByDedicatedIP")
+		return errors.Wrap(err, "peerManager.GetByDedicatedIP")
 	}
 	if !exists {
-		return errors.Wrap(errors.ErrNotFound, "peerManager.FindByDedicatedIP not found")
+		return errors.Wrap(errors.ErrNotFound, "peerManager.GetByDedicatedIP not found")
 	}
 
 	_, err = h.tunnel.PSH(peer.Addr(), packet.Payload())

@@ -2,6 +2,7 @@ package tunnel
 
 import (
 	"context"
+	"time"
 
 	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/internal/server"
@@ -13,15 +14,16 @@ type SYNHandler struct {
 	tunnel        Tunnel
 	peerManager   server.PeerManager
 	ipDistributor IpDistributor
+	keepAliveTTL  time.Duration
 }
 
 func (h *SYNHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
-	_, exists, err := h.peerManager.FindByAddr(ctx, packet.Addr())
+	_, exists, err := h.peerManager.GetByAddr(ctx, packet.Addr())
 	if err != nil {
-		return errors.Wrap(err, "peerManager.FindByAddr")
+		return errors.Wrap(err, "peerManager.GetByAddr")
 	}
 	if exists {
-		return errors.Wrap(errors.ErrNotFound, "peerManager.FindByAddr not found")
+		return errors.Wrap(errors.ErrNotFound, "peerManager.GetByAddr not found")
 	}
 
 	acquiredIP, err := h.ipDistributor.AcquireIP()
@@ -33,7 +35,7 @@ func (h *SYNHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 
 	logrus.Infof("Created new peer with addr: %s and dedicated ip: %s", peer.Addr(), peer.DedicatedIP())
 
-	if err = h.peerManager.Add(ctx, peer); err != nil {
+	if err = h.peerManager.Add(ctx, peer, h.keepAliveTTL); err != nil {
 		return errors.Wrap(err, "peerManager.Add")
 	}
 

@@ -16,6 +16,9 @@ type PSHHandler struct {
 func (h *PSHHandler) Handle(_ context.Context, packet *protocol.TunnelPacket) error {
 	ip.LogHeader(packet.Payload())
 
+	// TODO: проверять есть ли пир.
+	//  Если нет, отправлять флаг с ошибкой, чтобы клиент знал, что надо переподключиться
+
 	n, err := h.tun.Write(packet.Payload())
 	if err != nil {
 		return errors.Wrap(err, "tun.Write")
