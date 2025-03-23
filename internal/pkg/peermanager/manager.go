@@ -10,7 +10,7 @@ import (
 )
 
 type Manager struct {
-	mu                 *sync.RWMutex
+	mu                 sync.RWMutex
 	indexByDedicatedIP map[string]*server.Peer
 	indexByAddress     map[string]*server.Peer
 }
