@@ -1,11 +1,11 @@
-package server
+package config
 
 import (
 	"net"
 	"time"
 )
 
-type Config struct {
+type ServerConfig struct {
 	// Адрес сервера - тоннеля - ip:port на котором будет стартовать сервер
 	ServerAddr net.Addr
 	// Кол-во байт, которые будут читаться из tun интерфейса и туннеля

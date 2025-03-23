@@ -8,3 +8,7 @@ type TunPacket struct {
 func NewTunPacket(payload Payload) *TunPacket {
 	return &TunPacket{payload: payload}
 }
+
+func (t TunPacket) Payload() Payload {
+	return t.payload
+}

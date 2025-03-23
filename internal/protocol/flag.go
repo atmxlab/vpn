@@ -10,6 +10,8 @@ const (
 	FlagUNK Flag = iota
 	// FlagSYN - synchronize - установление соединения
 	FlagSYN
+	// FlagACK - acknowledgement - подтверждение соединения
+	FlagACK
 	// FlagFIN - finish -завершение соединения
 	FlagFIN
 	// FlagPSH -push - передача данных
@@ -26,6 +28,23 @@ func (f Flag) Byte() byte {
 	return byte(f)
 }
 
+func (f Flag) String() string {
+	switch f {
+	case FlagSYN:
+		return "synchronize"
+	case FlagACK:
+		return "acknowledgement"
+	case FlagFIN:
+		return "finish"
+	case FlagPSH:
+		return "push"
+	case FlagKPA:
+		return "keepalive"
+	default:
+		return "Unknown"
+	}
+}
+
 func Flags() []Flag {
-	return []Flag{FlagSYN, FlagFIN, FlagPSH, FlagKPA}
+	return []Flag{FlagSYN, FlagACK, FlagFIN, FlagPSH, FlagKPA}
 }
