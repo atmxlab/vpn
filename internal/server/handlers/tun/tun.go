@@ -4,7 +4,6 @@ import (
 	"context"
 
 	"github.com/atmxlab/vpn/internal/protocol"
-	"github.com/atmxlab/vpn/internal/server"
 	"github.com/atmxlab/vpn/pkg/errors"
 	"golang.org/x/net/ipv4"
 )
@@ -14,7 +13,7 @@ type Handler struct {
 	peerManager PeerManager
 }
 
-func NewHandler(tunnel Tunnel, peerManager server.PeerManager) *Handler {
+func NewHandler(tunnel Tunnel, peerManager PeerManager) *Handler {
 	return &Handler{tunnel: tunnel, peerManager: peerManager}
 }
 
