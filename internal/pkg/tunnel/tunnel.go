@@ -24,7 +24,7 @@ type Tunnel struct {
 	conn Connection
 }
 
-func NewTunnel(conn Connection) *Tunnel {
+func New(conn Connection) *Tunnel {
 	return &Tunnel{conn: conn}
 }
 
