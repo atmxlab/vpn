@@ -2,18 +2,26 @@ package tun
 
 import (
 	"context"
+	"io"
 	"sync"
 
-	"github.com/atmxlab/vpn/internal/tuntap"
 	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-type Tun struct {
-	tun tuntap.Tun
+// TunIface - виртуальный сетевой интерфейс
+// В Linux можно создавать два интерфейса - TUN и TAP
+// Нам необходим только TUN, так как работаем на L3 уровне, а не на L2
+type TunIface interface {
+	io.ReadWriteCloser
+	Name() string
 }
 
-func NewTun(tun tuntap.Tun) *Tun {
+type Tun struct {
+	tun TunIface
+}
+
+func NewTun(tun TunIface) *Tun {
 	return &Tun{tun: tun}
 }
 

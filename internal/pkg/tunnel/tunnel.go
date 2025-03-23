@@ -2,21 +2,30 @@ package tunnel
 
 import (
 	"context"
+	"io"
 	"net"
 	"sync"
 
 	"github.com/atmxlab/vpn/internal/protocol"
-	"github.com/atmxlab/vpn/internal/tunnel"
 	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-type Tunnel struct {
-	tunnel tunnel.Tunnel
+// Connection - тоннель через который проходит трафик
+// от VPN-сервера к VPN-клиент и обратно
+type Connection interface {
+	ReadFrom(p []byte) (n int, addr net.Addr, err error)
+	WriteTo(p []byte, addr net.Addr) (n int, err error)
+	LocalAddr() net.Addr
+	io.Closer
 }
 
-func NewTunnel(tunnel tunnel.Tunnel) *Tunnel {
-	return &Tunnel{tunnel: tunnel}
+type Tunnel struct {
+	conn Connection
+}
+
+func NewTunnel(conn Connection) *Tunnel {
+	return &Tunnel{conn: conn}
 }
 
 func (t *Tunnel) PSH(addr net.Addr, payload []byte) (int, error) {
@@ -40,9 +49,9 @@ func (t *Tunnel) ACK(addr net.Addr, payload []byte) (int, error) {
 }
 
 func (t *Tunnel) Write(tunnelPacket *protocol.TunnelPacket) (int, error) {
-	n, err := t.tunnel.WriteTo(tunnelPacket.Marshal(), tunnelPacket.Addr())
+	n, err := t.conn.WriteTo(tunnelPacket.Marshal(), tunnelPacket.Addr())
 	if err != nil {
-		return 0, errors.Wrap(err, "tunnel.WriteTo")
+		return 0, errors.Wrap(err, "conn.WriteTo")
 	}
 
 	logrus.Debugf("Write to TUNNEL %d bytes", n)
@@ -67,14 +76,14 @@ func (t *Tunnel) ReadFromWithContext(ctx context.Context, buf []byte) (int, net.
 		defer wg.Done()
 		defer close(resultChan)
 
-		n, addr, err := t.tunnel.ReadFrom(buf)
+		n, addr, err := t.conn.ReadFrom(buf)
 		resultChan <- result{n, addr, err}
 	}()
 
 	select {
 	case <-ctx.Done():
 		logrus.Warnf("Context canceled: %v", ctx.Err())
-		if err := t.tunnel.Close(); err != nil {
+		if err := t.conn.Close(); err != nil {
 			return 0, nil, errors.Join(err, ctx.Err())
 		}
 
@@ -88,5 +97,5 @@ func (t *Tunnel) ReadFromWithContext(ctx context.Context, buf []byte) (int, net.
 }
 
 func (t *Tunnel) Close() error {
-	return t.tunnel.Close()
+	return t.conn.Close()
 }

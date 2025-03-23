@@ -1,23 +1,31 @@
 package server
 
 import (
-	"github.com/atmxlab/vpn/internal/domain/usecase/auth"
-	"github.com/atmxlab/vpn/internal/http"
-	"github.com/atmxlab/vpn/internal/http/handler"
-	"github.com/atmxlab/vpn/pkg/errors"
+	"github.com/atmxlab/vpn/internal/config"
+	"github.com/atmxlab/vpn/internal/server/router"
 )
 
 func main() {
-	authHandler := handler.NewAuth(auth.New())
+	cfg := config.ServerConfig{
+		ServerAddr:                  nil,
+		BufferSize:                  0,
+		PeerKeepAliveMissingTimeout: 0,
+	}
 
-	httpServer := http.New(authHandler)
+	routerBuilder := router.NewBuilder()
 
-	err := httpServer.ListenAndServe(":8080")
-	checkErr(err)
+	routerBuilder.
+		Config(func(b *router.ConfigBuilder) {
+			b.
+				TunMtu(cfg.Tun.MTU).
+				TunSubnet(cfg.Tun.Subnet).
+				TunChanSize(cfg.Tun.TunChanSize).
+				TunnelChanSize(cfg.Tun.TunnelChanSize)
+		})
 }
 
 func checkErr(err error) {
 	if err != nil {
-		errors.Fatalf(err.Error())
+		panic(err)
 	}
 }

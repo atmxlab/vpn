@@ -19,5 +19,11 @@ type ServerConfig struct {
 		Subnet net.IPNet
 		// Maximum Transition Unit  - максимальная длина неделимого пакета
 		MTU uint16
+		// Размер буфера канала,
+		// в который будут складываться пакеты из тоннеля
+		TunnelChanSize uint
+		// Размер буфера канала,
+		// в который будут складываться пакеты из TUN интерфейса
+		TunChanSize uint
 	}
 }
