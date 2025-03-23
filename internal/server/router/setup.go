@@ -13,6 +13,9 @@ func (r *Router) setup() error {
 	return nil
 }
 
+// TODO: возможно все-таки стоит от этого избавиться отсюда.
+//  Можно сделать это выше
+
 func (r *Router) configureRoute() error {
 	if err := r.routeConfigurator.EnableIPForward(); err != nil {
 		return errors.Wrap(err, "routeConfigurator.EnableIPForward")

@@ -27,7 +27,7 @@ func New(subnet net.IPNet) (*Distributor, error) {
 	return d, nil
 }
 
-func (ipd *Distributor) AllocateIP() (net.IP, error) {
+func (ipd *Distributor) AcquireIP() (net.IP, error) {
 	ipd.m.Lock()
 	defer ipd.m.Unlock()
 

@@ -10,8 +10,6 @@ type Builder struct {
 	cfg                 *config
 	tunnel              Tunnel
 	tun                 Tun
-	tunnelChanSize      uint
-	tunChanSize         uint
 	routeConfigurator   RouteConfigurator
 	tunHandler          TunHandler
 	tunnelHandlerByFlag map[protocol.Flag]TunnelHandler
@@ -19,8 +17,6 @@ type Builder struct {
 
 func NewBuilder() *Builder {
 	return &Builder{
-		tunChanSize:         1024,
-		tunnelChanSize:      1024,
 		tunnelHandlerByFlag: make(map[protocol.Flag]TunnelHandler, len(protocol.Flags())),
 	}
 }
@@ -44,16 +40,6 @@ func (b *Builder) Tun(tun Tun) *Builder {
 	return b
 }
 
-func (b *Builder) TunnelChanSize(size uint) *Builder {
-	b.tunnelChanSize = size
-	return b
-}
-
-func (b *Builder) TunChanSize(size uint) *Builder {
-	b.tunChanSize = size
-	return b
-}
-
 func (b *Builder) RouteConfigurator(routeConfigurator RouteConfigurator) *Builder {
 	b.routeConfigurator = routeConfigurator
 	return b
@@ -71,6 +57,19 @@ func (b *Builder) TunnelHandler(fn func(build *TunnelHandlerBuilder)) *Builder {
 	b.tunnelHandlerByFlag = builder.Build()
 
 	return b
+}
+
+func (b *Builder) Build() *Router {
+	return &Router{
+		tunnel:              b.tunnel,
+		tun:                 b.tun,
+		tunnelPackets:       make(chan *protocol.TunnelPacket, b.cfg.tunnelChanSize),
+		tunPackets:          make(chan *protocol.TunPacket, b.cfg.tunChanSize),
+		cfg:                 b.cfg,
+		routeConfigurator:   b.routeConfigurator,
+		tunHandler:          b.tunHandler,
+		tunnelHandlerByFlag: b.tunnelHandlerByFlag,
+	}
 }
 
 type ConfigBuilder struct {
@@ -137,18 +136,17 @@ func (b *TunnelHandlerBuilder) SYN(handler TunnelHandler) *TunnelHandlerBuilder 
 	b.tunnelHandlerByFlag[protocol.FlagSYN] = handler
 	return b
 }
-func (b *TunnelHandlerBuilder) ACK(handler TunnelHandler) *TunnelHandlerBuilder {
-	b.tunnelHandlerByFlag[protocol.FlagACK] = handler
-	return b
-}
+
 func (b *TunnelHandlerBuilder) FIN(handler TunnelHandler) *TunnelHandlerBuilder {
 	b.tunnelHandlerByFlag[protocol.FlagFIN] = handler
 	return b
 }
+
 func (b *TunnelHandlerBuilder) PSH(handler TunnelHandler) *TunnelHandlerBuilder {
 	b.tunnelHandlerByFlag[protocol.FlagPSH] = handler
 	return b
 }
+
 func (b *TunnelHandlerBuilder) KPA(handler TunnelHandler) *TunnelHandlerBuilder {
 	b.tunnelHandlerByFlag[protocol.FlagKPA] = handler
 	return b

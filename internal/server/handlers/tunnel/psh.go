@@ -15,6 +15,10 @@ type PSHHandler struct {
 	tunnel      Tunnel
 }
 
+func NewPSHHandler(peerManager PeerManager, tun Tun, tunnel Tunnel) *PSHHandler {
+	return &PSHHandler{peerManager: peerManager, tun: tun, tunnel: tunnel}
+}
+
 func (h *PSHHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
 	ip.LogHeader(packet.Payload())
 

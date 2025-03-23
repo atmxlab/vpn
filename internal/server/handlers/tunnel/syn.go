@@ -17,6 +17,20 @@ type SYNHandler struct {
 	keepAliveTTL  time.Duration
 }
 
+func NewSYNHandler(
+	peerManager PeerManager,
+	tunnel Tunnel,
+	ipDistributor IpDistributor,
+	keepAliveTTL time.Duration,
+) *SYNHandler {
+	return &SYNHandler{
+		peerManager:   peerManager,
+		tunnel:        tunnel,
+		ipDistributor: ipDistributor,
+		keepAliveTTL:  keepAliveTTL,
+	}
+}
+
 func (h *SYNHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
 	has, err := h.peerManager.HasPeer(ctx, packet.Addr())
 	if err != nil {

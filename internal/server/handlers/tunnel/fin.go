@@ -13,6 +13,10 @@ type FINHandler struct {
 	ipDistributor IpDistributor
 }
 
+func NewFINHandler(peerManager PeerManager, ipDistributor IpDistributor) *FINHandler {
+	return &FINHandler{peerManager: peerManager, ipDistributor: ipDistributor}
+}
+
 func (h *FINHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
 	peer, exists, err := h.peerManager.GetByAddr(ctx, packet.Addr())
 	if err != nil {

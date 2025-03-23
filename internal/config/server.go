@@ -10,20 +10,22 @@ type ServerConfig struct {
 	ServerAddr net.Addr
 	// Кол-во байт, которые будут читаться из tun интерфейса и туннеля
 	BufferSize uint16
-	// Таймаут сохранения соединения после последнего получения keepalive сообщения
-	PeerKeepAliveMissingTimeout time.Duration
+	// Время жизни пира до следующего keepalive запроса
+	PeerKeepAliveTTL time.Duration
 
-	Tun struct {
-		// 10.1.1.0/24 Подсеть TUN интерфейса
-		// Из этой подсети будут выдаваться IP адреса клиентам
-		Subnet net.IPNet
-		// Maximum Transition Unit  - максимальная длина неделимого пакета
-		MTU uint16
-		// Размер буфера канала,
-		// в который будут складываться пакеты из тоннеля
-		TunnelChanSize uint
-		// Размер буфера канала,
-		// в который будут складываться пакеты из TUN интерфейса
-		TunChanSize uint
-	}
+	Tun ServerTun
+}
+
+type ServerTun struct {
+	// 10.1.1.0/24 Подсеть TUN интерфейса
+	// Из этой подсети будут выдаваться IP адреса клиентам
+	Subnet net.IPNet
+	// Maximum Transition Unit  - максимальная длина неделимого пакета
+	MTU uint16
+	// Размер буфера канала,
+	// в который будут складываться пакеты из тоннеля
+	TunnelChanSize uint
+	// Размер буфера канала,
+	// в который будут складываться пакеты из TUN интерфейса
+	TunChanSize uint
 }

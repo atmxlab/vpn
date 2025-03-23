@@ -22,11 +22,11 @@ func TestDistributor(t *testing.T) {
 		d, err := ipdistributor.New(subnet)
 		require.NoError(t, err)
 
-		allocatedIP, err := d.AllocateIP()
+		acquiredIP, err := d.AcquireIP()
 		require.NoError(t, err)
-		require.Equal(t, subnet.IP, allocatedIP)
+		require.Equal(t, subnet.IP, acquiredIP)
 
-		_, err = d.AllocateIP()
+		_, err = d.AcquireIP()
 		require.Error(t, err)
 	})
 
@@ -41,17 +41,17 @@ func TestDistributor(t *testing.T) {
 		d, err := ipdistributor.New(subnet)
 		require.NoError(t, err)
 
-		allocatedIP, err := d.AllocateIP()
+		acquiredIP, err := d.AcquireIP()
 		require.NoError(t, err)
-		require.Equal(t, net.IPv4(1, 1, 1, 0).To4(), allocatedIP.To4())
+		require.Equal(t, net.IPv4(1, 1, 1, 0).To4(), acquiredIP.To4())
 
-		allocatedIP, err = d.AllocateIP()
+		acquiredIP, err = d.AcquireIP()
 		require.NoError(t, err)
-		require.Equal(t, net.IPv4(1, 1, 1, 1).To4(), allocatedIP.To4())
+		require.Equal(t, net.IPv4(1, 1, 1, 1).To4(), acquiredIP.To4())
 
-		allocatedIP, err = d.AllocateIP()
+		acquiredIP, err = d.AcquireIP()
 		require.NoError(t, err)
-		require.Equal(t, net.IPv4(1, 1, 1, 2).To4(), allocatedIP.To4())
+		require.Equal(t, net.IPv4(1, 1, 1, 2).To4(), acquiredIP.To4())
 	})
 
 	t.Run("24 bits mask - check last ip", func(t *testing.T) {
@@ -66,14 +66,14 @@ func TestDistributor(t *testing.T) {
 		require.NoError(t, err)
 
 		var lastIP net.IP
-		var allocatedIP net.IP
+		var acquiredIP net.IP
 
 		for {
-			allocatedIP, err = d.AllocateIP()
+			acquiredIP, err = d.AcquireIP()
 			if err != nil {
 				break
 			} else {
-				lastIP = allocatedIP
+				lastIP = acquiredIP
 			}
 		}
 
