@@ -5,13 +5,12 @@ import (
 	"time"
 
 	"github.com/atmxlab/vpn/internal/protocol"
-	"github.com/atmxlab/vpn/internal/server"
 	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
 type KPAHandler struct {
-	peerManager  server.PeerManager
+	peerManager  PeerManager
 	keepAliveTTL time.Duration
 }
 

@@ -2,7 +2,6 @@ package tun
 
 import (
 	"context"
-	"net"
 
 	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/internal/server"
@@ -10,13 +9,9 @@ import (
 	"golang.org/x/net/ipv4"
 )
 
-type Tunnel interface {
-	PSH(addr net.Addr, payload []byte) (int, error)
-}
-
 type Handler struct {
 	tunnel      Tunnel
-	peerManager server.PeerManager
+	peerManager PeerManager
 }
 
 func NewHandler(tunnel Tunnel, peerManager server.PeerManager) *Handler {

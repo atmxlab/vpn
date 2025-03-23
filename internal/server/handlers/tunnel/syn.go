@@ -11,18 +11,18 @@ import (
 )
 
 type SYNHandler struct {
+	peerManager   PeerManager
 	tunnel        Tunnel
-	peerManager   server.PeerManager
 	ipDistributor IpDistributor
 	keepAliveTTL  time.Duration
 }
 
 func (h *SYNHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
-	_, exists, err := h.peerManager.GetByAddr(ctx, packet.Addr())
+	has, err := h.peerManager.HasPeer(ctx, packet.Addr())
 	if err != nil {
 		return errors.Wrap(err, "peerManager.GetByAddr")
 	}
-	if exists {
+	if has {
 		return errors.Wrap(errors.ErrNotFound, "peerManager.GetByAddr not found")
 	}
 

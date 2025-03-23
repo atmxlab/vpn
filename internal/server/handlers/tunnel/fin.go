@@ -4,13 +4,12 @@ import (
 	"context"
 
 	"github.com/atmxlab/vpn/internal/protocol"
-	"github.com/atmxlab/vpn/internal/server"
 	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
 type FINHandler struct {
-	peerManager   server.PeerManager
+	peerManager   PeerManager
 	ipDistributor IpDistributor
 }
 
