@@ -1,5 +1,7 @@
 package tunnel
 
+import "io"
+
 type Tun interface {
-	Write(data []byte) (int, error)
+	io.Writer
 }

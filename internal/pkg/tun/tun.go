@@ -25,6 +25,10 @@ func NewTun(tun TunIface) *Tun {
 	return &Tun{tun: tun}
 }
 
+func (t *Tun) Write(buf []byte) (int, error) {
+	return t.tun.Write(buf)
+}
+
 // ReadWithContext - необходим, чтобы учитывать отмену контекста при чтении из потока
 func (t *Tun) ReadWithContext(ctx context.Context, buf []byte) (int, error) {
 	type result struct {

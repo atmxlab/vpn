@@ -10,8 +10,8 @@ type ServerConfig struct {
 	ServerAddr net.Addr
 	// Кол-во байт, которые будут читаться из tun интерфейса и туннеля
 	BufferSize uint16
-	// Таймаут сохранения соединения после последнего получения keepalive сообщения
-	PeerKeepAliveMissingTimeout time.Duration
+	// Время жизни пира до следующего keepalive запроса
+	PeerKeepAliveTTL time.Duration
 
 	Tun struct {
 		// 10.1.1.0/24 Подсеть TUN интерфейса

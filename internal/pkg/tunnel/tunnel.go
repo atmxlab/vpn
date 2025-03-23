@@ -38,6 +38,16 @@ func (t *Tunnel) PSH(addr net.Addr, payload []byte) (int, error) {
 	return t.Write(tunnelPacket)
 }
 
+func (t *Tunnel) SYN(addr net.Addr, payload []byte) (int, error) {
+	tunnelPacket := protocol.NewTunnelPacket(
+		protocol.NewHeader(protocol.FlagSYN),
+		payload,
+		addr,
+	)
+
+	return t.Write(tunnelPacket)
+}
+
 func (t *Tunnel) ACK(addr net.Addr, payload []byte) (int, error) {
 	tunnelPacket := protocol.NewTunnelPacket(
 		protocol.NewHeader(protocol.FlagACK),

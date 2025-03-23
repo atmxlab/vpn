@@ -14,6 +14,10 @@ type KPAHandler struct {
 	keepAliveTTL time.Duration
 }
 
+func NewKPAHandler(peerManager PeerManager, keepAliveTTL time.Duration) *KPAHandler {
+	return &KPAHandler{peerManager: peerManager, keepAliveTTL: keepAliveTTL}
+}
+
 func (h *KPAHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
 	_, exists, err := h.peerManager.GetByAddrAndExtend(ctx, packet.Addr(), h.keepAliveTTL)
 	if err != nil {
