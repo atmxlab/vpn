@@ -9,7 +9,7 @@ import (
 func (r *Router) consumeTun(ctx context.Context) error {
 	for packet := range r.tunPackets {
 		if err := r.tunHandler.Handle(ctx, packet); err != nil {
-			logrus.Errorf("failed to handle TUN packet %+v: %v", packet, err)
+			logrus.Errorf("Failed to handle TUN packet %+v: %v", packet, err)
 		}
 	}
 

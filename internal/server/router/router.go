@@ -11,19 +11,6 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-// RouteConfigurator - конфигурирует сеть на сервере под VPN сервер
-type RouteConfigurator interface {
-	// EnableIPForward - включает транзит IP пакетов на сервере
-	// e.g. sysctl -w net.ipv4.ip_forward=1
-	EnableIPForward() error
-	// ConfigureFirewall - конфигурирует сетевой фильтр
-	// e.g. netfilter - iptables, nftables
-	// TODO: в идеале эта штука должна создать отдельную цепочку
-	ConfigureFirewall(subnet net.IPNet) error
-	// SetDefaultRoute - указывает шлюз по умолчанию для подсети
-	SetDefaultRoute(subnet net.IPNet) error
-}
-
 // Tun - TUN интерфейс - из него читаем и отдаем пакеты обработчику
 type Tun interface {
 	ReadWithContext(ctx context.Context, data []byte) (int, error)
@@ -65,8 +52,7 @@ type Router struct {
 	// Пакеты из этого канала отправляются в тоннель - клиенту
 	tunPackets chan *protocol.TunPacket
 
-	cfg               *config
-	routeConfigurator RouteConfigurator
+	cfg *config
 
 	tunHandler          TunHandler
 	tunnelHandlerByFlag map[protocol.Flag]TunnelHandler
@@ -86,10 +72,6 @@ func (r *Router) Run(ctx context.Context) error {
 	defer cancel()
 
 	r.cancel = cancel
-
-	if err := r.setup(); err != nil {
-		return errors.Wrap(err, "setup")
-	}
 
 	r.eg, ctx = errgroup.WithContext(ctx)
 

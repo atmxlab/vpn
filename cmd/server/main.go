@@ -25,6 +25,7 @@ func main() {
 			logrus.Fatalf("Stack trace:\n%s", debug.Stack())
 		}
 	}()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -47,10 +48,10 @@ func main() {
 		},
 	}
 
-	tunIface, err := setupTun(cfg.Tun.Subnet, cfg.Tun.MTU)
+	embeddedTun, err := setupTun(cfg.Tun.Subnet, cfg.Tun.MTU)
 	exitIF(err, "setupTun")
 
-	tn := tun.NewTun(tunIface)
+	tn := tun.NewTun(embeddedTun)
 
 	conn, err := udp.New(cfg.ServerAddr)
 	exitIF(err, "udp.New")
@@ -62,7 +63,7 @@ func main() {
 	ipDistributor, err := ipdistributor.New(cfg.Tun.Subnet)
 	exitIF(err, "ipdistributor.New")
 
-	rc := route.NewConfigurator()
+	exitIF(setupOS(route.NewConfigurator(), cfg), "setupOS")
 
 	routerBuilder := router.NewBuilder()
 
@@ -75,7 +76,6 @@ func main() {
 				TunChanSize(cfg.Tun.TunChanSize).
 				TunnelChanSize(cfg.Tun.TunnelChanSize)
 		}).
-		RouteConfigurator(rc).
 		Tun(tn).
 		Tunnel(tunl).
 		TunHandler(tunhandler.NewHandler(tunl, pm)).

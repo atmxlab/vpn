@@ -10,7 +10,6 @@ type Builder struct {
 	cfg                 *config
 	tunnel              Tunnel
 	tun                 Tun
-	routeConfigurator   RouteConfigurator
 	tunHandler          TunHandler
 	tunnelHandlerByFlag map[protocol.Flag]TunnelHandler
 }
@@ -40,11 +39,6 @@ func (b *Builder) Tun(tun Tun) *Builder {
 	return b
 }
 
-func (b *Builder) RouteConfigurator(routeConfigurator RouteConfigurator) *Builder {
-	b.routeConfigurator = routeConfigurator
-	return b
-}
-
 func (b *Builder) TunHandler(tunHandler TunHandler) *Builder {
 	b.tunHandler = tunHandler
 	return b
@@ -66,7 +60,6 @@ func (b *Builder) Build() *Router {
 		tunnelPackets:       make(chan *protocol.TunnelPacket, b.cfg.tunnelChanSize),
 		tunPackets:          make(chan *protocol.TunPacket, b.cfg.tunChanSize),
 		cfg:                 b.cfg,
-		routeConfigurator:   b.routeConfigurator,
 		tunHandler:          b.tunHandler,
 		tunnelHandlerByFlag: b.tunnelHandlerByFlag,
 	}
