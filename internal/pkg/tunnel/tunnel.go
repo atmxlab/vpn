@@ -13,6 +13,8 @@ import (
 
 // Connection - тоннель через который проходит трафик
 // от VPN-сервера к VPN-клиент и обратно
+//
+//go:generate mock Connection
 type Connection interface {
 	ReadFrom(p []byte) (n int, addr net.Addr, err error)
 	WriteTo(p []byte, addr net.Addr) (n int, err error)

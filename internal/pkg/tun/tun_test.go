@@ -15,7 +15,7 @@ import (
 func TestTun_Write(t *testing.T) {
 	t.Parallel()
 
-	t.Run("happy path", func(t *testing.T) {
+	t.Run("without error", func(t *testing.T) {
 		t.Parallel()
 
 		ctrl := gomock.NewController(t)
