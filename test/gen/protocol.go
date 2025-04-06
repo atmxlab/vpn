@@ -1,6 +1,8 @@
 package gen
 
-import "github.com/atmxlab/vpn/internal/protocol"
+import (
+	"github.com/atmxlab/vpn/internal/protocol"
+)
 
 func RandTunnelPacket() *protocol.TunnelPacket {
 	return protocol.NewTunnelPacket(
