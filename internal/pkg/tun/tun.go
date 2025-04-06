@@ -9,19 +9,21 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-// TunIface - виртуальный сетевой интерфейс
+// EmbeddedTun - виртуальный сетевой интерфейс
 // В Linux можно создавать два интерфейса - TUN и TAP
 // Нам необходим только TUN, так как работаем на L3 уровне, а не на L2
-type TunIface interface {
+//
+//go:generate mock EmbeddedTun
+type EmbeddedTun interface {
 	io.ReadWriteCloser
 	Name() string
 }
 
 type Tun struct {
-	tun TunIface
+	tun EmbeddedTun
 }
 
-func NewTun(tun TunIface) *Tun {
+func NewTun(tun EmbeddedTun) *Tun {
 	return &Tun{tun: tun}
 }
 
