@@ -31,7 +31,7 @@ func main() {
 
 	// TODO: вынести в конфиг
 	updAddr, err := net.ResolveUDPAddr("udp", ":6000")
-	exitIF(err, "net.ResolveUDPAddr")
+	exitf(err, "net.ResolveUDPAddr")
 
 	cfg := config.ServerConfig{
 		ServerAddr:       updAddr,
@@ -49,21 +49,21 @@ func main() {
 	}
 
 	embeddedTun, err := setupTun(cfg.Tun.Subnet, cfg.Tun.MTU)
-	exitIF(err, "setupTun")
+	exitf(err, "setupTun")
 
 	tn := tun.NewTun(embeddedTun)
 
 	conn, err := udp.New(cfg.ServerAddr)
-	exitIF(err, "udp.New")
+	exitf(err, "udp.New")
 
 	tunl := tunnel.New(conn)
 
 	pm := peermanager.New()
 
 	ipDistributor, err := ipdistributor.New(cfg.Tun.Subnet)
-	exitIF(err, "ipdistributor.New")
+	exitf(err, "ipdistributor.New")
 
-	exitIF(setupOS(route.NewConfigurator(), cfg), "setupOS")
+	exitf(setupOS(route.NewConfigurator(), cfg), "setupOS")
 
 	routerBuilder := router.NewBuilder()
 
@@ -88,5 +88,5 @@ func main() {
 
 	rt := routerBuilder.Build()
 
-	exitIF(rt.Run(ctx), "router.Run")
+	exitf(rt.Run(ctx), "router.Run")
 }

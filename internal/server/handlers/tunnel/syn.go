@@ -37,7 +37,7 @@ func (h *SYNHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 		return errors.Wrap(err, "peerManager.GetByAddr")
 	}
 	if has {
-		return errors.Wrap(errors.ErrNotFound, "peerManager.GetByAddr not found")
+		return errors.AlreadyExists("peer already exists: addr=[%s]", packet.Addr())
 	}
 
 	acquiredIP, err := h.ipDistributor.AcquireIP()

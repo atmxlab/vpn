@@ -5,7 +5,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
-func exitIF(err error, msg string, a ...any) {
+func exitf(err error, msg string, a ...any) {
 	if err != nil {
 		exit(errors.Wrapf(err, msg, a...))
 	}

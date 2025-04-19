@@ -31,7 +31,7 @@ func (h *Handler) Handle(
 		return errors.Wrap(err, "peerManager.GetByDedicatedIP")
 	}
 	if !exists {
-		return errors.Wrap(errors.ErrNotFound, "peerManager.GetByDedicatedIP not found")
+		return errors.NotFound("peer by dedicated ip not found: ip=[%s]", header.Dst)
 	}
 
 	_, err = h.tunnel.PSH(peer.Addr(), packet.Payload())

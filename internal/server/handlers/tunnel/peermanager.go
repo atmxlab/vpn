@@ -9,6 +9,8 @@ import (
 )
 
 // PeerManager - управляющий пирами
+//
+//go:generate mock PeerManager
 type PeerManager interface {
 	Add(ctx context.Context, peer *server.Peer, ttl time.Duration) error
 	Remove(ctx context.Context, peer *server.Peer) error

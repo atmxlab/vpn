@@ -32,7 +32,7 @@ func (u *Usecase) Auth(ctx context.Context, options usecase.AuthOptions) (*useca
 		return nil, errors.Wrap(err, "get client by key")
 	}
 	if !exists {
-		return nil, errors.ErrNotFound
+		return nil, errors.NotFound("client not found")
 	}
 
 	dedicatedIP, err := u.ipDistributor.AllocateIP(ctx)

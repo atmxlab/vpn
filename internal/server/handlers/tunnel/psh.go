@@ -30,6 +30,7 @@ func (h *PSHHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 	if !has {
 		logrus.Warnf("Peer not found: addr=[%s]", packet.Addr())
 
+		// after server syn, client must init syn
 		_, err = h.tunnel.SYN(packet.Addr(), nil)
 		if err != nil {
 			return errors.Wrap(err, "tunnel.SYN")

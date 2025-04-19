@@ -8,6 +8,7 @@ SERVER_BIN_PATH = ./build/server/server
 
 # Targets
 
+.PHONY: test
 test:
 	go test -failfast -fullpath -cover -race -timeout=$(if $(timeout), $(count),5s) $(if $(count),-count=$(count)) $(if $(run),-run=$(run)) $(if $(package),$(package),./...)
 

@@ -23,7 +23,7 @@ func (h *FINHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 		return errors.Wrap(err, "peerManager.GetByAddr")
 	}
 	if !exists {
-		return errors.Wrap(errors.ErrNotFound, "peer not found")
+		return errors.NotFound("peer not found")
 	}
 
 	if err = h.peerManager.Remove(ctx, peer); err != nil {

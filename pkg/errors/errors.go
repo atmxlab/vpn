@@ -7,3 +7,15 @@ var (
 	ErrNotFound        = errors.New("not found")
 	ErrAlreadyExists   = errors.New("already exists")
 )
+
+func NotFound(msg string, a ...any) error {
+	return Wrapf(ErrNotFound, msg, a)
+}
+
+func InvalidArgument(msg string, a ...any) error {
+	return Wrapf(ErrInvalidArgument, msg, a)
+}
+
+func AlreadyExists(msg string, a ...any) error {
+	return Wrapf(ErrAlreadyExists, msg, a)
+}
