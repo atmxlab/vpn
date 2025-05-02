@@ -22,10 +22,6 @@ func TestDistributor(t *testing.T) {
 		d, err := ipdistributor.New(subnet)
 		require.NoError(t, err)
 
-		acquiredIP, err := d.AcquireIP()
-		require.NoError(t, err)
-		require.Equal(t, subnet.IP, acquiredIP)
-
 		_, err = d.AcquireIP()
 		require.Error(t, err)
 	})
@@ -43,15 +39,15 @@ func TestDistributor(t *testing.T) {
 
 		acquiredIP, err := d.AcquireIP()
 		require.NoError(t, err)
-		require.Equal(t, net.IPv4(1, 1, 1, 0).To4(), acquiredIP.To4())
-
-		acquiredIP, err = d.AcquireIP()
-		require.NoError(t, err)
-		require.Equal(t, net.IPv4(1, 1, 1, 1).To4(), acquiredIP.To4())
-
-		acquiredIP, err = d.AcquireIP()
-		require.NoError(t, err)
 		require.Equal(t, net.IPv4(1, 1, 1, 2).To4(), acquiredIP.To4())
+
+		acquiredIP, err = d.AcquireIP()
+		require.NoError(t, err)
+		require.Equal(t, net.IPv4(1, 1, 1, 3).To4(), acquiredIP.To4())
+
+		acquiredIP, err = d.AcquireIP()
+		require.NoError(t, err)
+		require.Equal(t, net.IPv4(1, 1, 1, 4).To4(), acquiredIP.To4())
 	})
 
 	t.Run("24 bits mask - check last ip", func(t *testing.T) {
@@ -77,6 +73,6 @@ func TestDistributor(t *testing.T) {
 			}
 		}
 
-		require.Equal(t, net.IPv4(1, 1, 1, 255).To4(), lastIP.To4())
+		require.Equal(t, net.IPv4(1, 1, 1, 254).To4(), lastIP.To4())
 	})
 }

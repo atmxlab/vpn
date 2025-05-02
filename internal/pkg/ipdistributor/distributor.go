@@ -59,7 +59,16 @@ func (ipd *Distributor) generateIpPool() {
 	ipd.m.Lock()
 	defer ipd.m.Unlock()
 
+	i := 0
 	for ipp := ipd.subnet.IP.Mask(ipd.subnet.Mask); ipd.subnet.Contains(ipp); ipd.incIP(ipp) {
+		if ipp.To4()[3] == 0 || ipp.To4()[3] == 255 {
+			continue
+		}
+		i++
+		if i == 1 {
+			continue
+		}
+
 		ipd.sortedIPPool = append(ipd.sortedIPPool, ipp.String())
 		ipd.ipPool[ipp.String()] = false
 	}

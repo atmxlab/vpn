@@ -127,7 +127,7 @@ func TestServer(t *testing.T) {
 
 		client := gen.RandAddr()
 		tunPacket := gen.RandTunICMPReq(t, func(h *stub.IPHeader) {
-			h.Dst = net.IPv4(10, 0, 0, 0)
+			h.Dst = net.IPv4(10, 0, 0, 2)
 		})
 		eng := engine.New(t)
 

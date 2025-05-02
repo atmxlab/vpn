@@ -98,6 +98,8 @@ func New(
 }
 
 func (e *engine) REPLAY(actions ...test.Action) {
+	e.app.T().Helper()
+
 	defer e.cancelFunc()
 
 	for _, action := range actions {

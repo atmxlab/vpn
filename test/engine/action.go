@@ -7,6 +7,8 @@ type simpleAction struct {
 }
 
 func (s *simpleAction) Handle(a test.App) {
+	a.T().Helper()
+
 	s.callback(a)
 }
 

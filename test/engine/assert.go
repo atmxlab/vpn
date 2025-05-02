@@ -10,6 +10,8 @@ import (
 
 func CHECKPOINT(actions ...test.Action) test.Action {
 	return newSimpleAction(func(a test.App) {
+		a.T().Helper()
+
 		for _, action := range actions {
 			action.Handle(a)
 		}
@@ -71,6 +73,8 @@ func ExpectTunnelACK(dst net.Addr) test.Action {
 
 func ExpectTunnelPSH(dst net.Addr, payload protocol.Payload) test.Action {
 	return newSimpleAction(func(a test.App) {
+		a.T().Helper()
+
 		lastPacket, ok := a.Tunnel().GetLastPacket()
 
 		require.Truef(a.T(), ok, "tunnel cannot be empty")
