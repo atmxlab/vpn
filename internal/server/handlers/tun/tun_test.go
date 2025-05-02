@@ -5,13 +5,12 @@ import (
 	"net"
 	"testing"
 
-	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/internal/server"
 	"github.com/atmxlab/vpn/internal/server/handlers/tun"
 	"github.com/atmxlab/vpn/internal/server/handlers/tun/mocks"
 	"github.com/atmxlab/vpn/pkg/errors"
-	"github.com/atmxlab/vpn/test"
 	"github.com/atmxlab/vpn/test/gen"
+	"github.com/atmxlab/vpn/test/stub"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -23,15 +22,12 @@ func TestHandle(t *testing.T) {
 		t.Parallel()
 
 		var (
-			ctx      = context.Background()
-			ipPacket = test.NewIPPacketBuilder(t).
-					SrcIP(gen.RandIP()).
-					DstIP(gen.RandIP()).
-					Payload(gen.RandPayload()).
-					TCP().
-					Build()
-			peer      = server.NewPeer(ipPacket.DstIP(), gen.RandAddr())
-			tunPacket = protocol.NewTunPacket(ipPacket.Bytes())
+			ctx         = context.Background()
+			peer        = gen.RandPeer()
+			dedicatedIP = gen.RandIP()
+			tunPacket   = gen.RandTunICMPReq(t, func(h *stub.IPHeader) {
+				h.Dst = dedicatedIP
+			})
 		)
 
 		ctrl := gomock.NewController(t)
@@ -39,8 +35,8 @@ func TestHandle(t *testing.T) {
 		peerManager.
 			EXPECT().
 			GetByDedicatedIP(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, dedicatedIP net.IP) (*server.Peer, bool, error) {
-				require.True(t, ipPacket.DstIP().Equal(dedicatedIP))
+			DoAndReturn(func(ctx context.Context, dIP net.IP) (*server.Peer, bool, error) {
+				require.True(t, dedicatedIP.Equal(dIP))
 				return peer, true, nil
 			})
 
@@ -57,14 +53,11 @@ func TestHandle(t *testing.T) {
 		t.Parallel()
 
 		var (
-			ctx      = context.Background()
-			ipPacket = test.NewIPPacketBuilder(t).
-					SrcIP(gen.RandIP()).
-					DstIP(gen.RandIP()).
-					Payload(gen.RandPayload()).
-					TCP().
-					Build()
-			tunPacket = protocol.NewTunPacket(ipPacket.Bytes())
+			ctx         = context.Background()
+			dedicatedIP = gen.RandIP()
+			tunPacket   = gen.RandTunICMPReq(t, func(h *stub.IPHeader) {
+				h.Dst = dedicatedIP
+			})
 		)
 
 		ctrl := gomock.NewController(t)
@@ -73,8 +66,8 @@ func TestHandle(t *testing.T) {
 		peerManager.
 			EXPECT().
 			GetByDedicatedIP(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, dedicatedIP net.IP) (*server.Peer, bool, error) {
-				require.True(t, ipPacket.DstIP().Equal(dedicatedIP))
+			DoAndReturn(func(ctx context.Context, dIP net.IP) (*server.Peer, bool, error) {
+				require.True(t, dedicatedIP.Equal(dIP))
 				return nil, false, peerManagerError
 			})
 
@@ -90,14 +83,11 @@ func TestHandle(t *testing.T) {
 		t.Parallel()
 
 		var (
-			ctx      = context.Background()
-			ipPacket = test.NewIPPacketBuilder(t).
-					SrcIP(gen.RandIP()).
-					DstIP(gen.RandIP()).
-					Payload(gen.RandPayload()).
-					TCP().
-					Build()
-			tunPacket = protocol.NewTunPacket(ipPacket.Bytes())
+			ctx         = context.Background()
+			dedicatedIP = gen.RandIP()
+			tunPacket   = gen.RandTunICMPReq(t, func(h *stub.IPHeader) {
+				h.Dst = dedicatedIP
+			})
 		)
 
 		ctrl := gomock.NewController(t)
@@ -105,8 +95,8 @@ func TestHandle(t *testing.T) {
 		peerManager.
 			EXPECT().
 			GetByDedicatedIP(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, dedicatedIP net.IP) (*server.Peer, bool, error) {
-				require.True(t, ipPacket.DstIP().Equal(dedicatedIP))
+			DoAndReturn(func(ctx context.Context, dIP net.IP) (*server.Peer, bool, error) {
+				require.True(t, dedicatedIP.Equal(dIP))
 				return nil, false, nil
 			})
 
@@ -122,15 +112,12 @@ func TestHandle(t *testing.T) {
 		t.Parallel()
 
 		var (
-			ctx      = context.Background()
-			ipPacket = test.NewIPPacketBuilder(t).
-					SrcIP(gen.RandIP()).
-					DstIP(gen.RandIP()).
-					Payload(gen.RandPayload()).
-					TCP().
-					Build()
-			peer      = server.NewPeer(ipPacket.DstIP(), gen.RandAddr())
-			tunPacket = protocol.NewTunPacket(ipPacket.Bytes())
+			ctx         = context.Background()
+			peer        = gen.RandPeer()
+			dedicatedIP = gen.RandIP()
+			tunPacket   = gen.RandTunICMPReq(t, func(h *stub.IPHeader) {
+				h.Dst = dedicatedIP
+			})
 		)
 
 		ctrl := gomock.NewController(t)
@@ -138,8 +125,8 @@ func TestHandle(t *testing.T) {
 		peerManager.
 			EXPECT().
 			GetByDedicatedIP(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, dedicatedIP net.IP) (*server.Peer, bool, error) {
-				require.True(t, ipPacket.DstIP().Equal(dedicatedIP))
+			DoAndReturn(func(ctx context.Context, dIP net.IP) (*server.Peer, bool, error) {
+				require.True(t, dedicatedIP.Equal(dedicatedIP))
 				return peer, true, nil
 			})
 

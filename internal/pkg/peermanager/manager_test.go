@@ -37,10 +37,11 @@ func TestManager(t *testing.T) {
 
 		ctx := context.Background()
 		peer := gen.RandPeer()
+		ttl := 1 * time.Second
 
 		pm := peermanager.New()
 
-		require.NoError(t, pm.Add(ctx, peer, gen.RandDuration()))
+		require.NoError(t, pm.Add(ctx, peer, ttl))
 
 		actualPeer, exists, err := pm.GetByDedicatedIP(ctx, peer.DedicatedIP())
 		require.NoError(t, err)
