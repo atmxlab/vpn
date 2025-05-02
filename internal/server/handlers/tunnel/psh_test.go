@@ -7,8 +7,8 @@ import (
 	"github.com/atmxlab/vpn/internal/server/handlers/tunnel"
 	"github.com/atmxlab/vpn/internal/server/handlers/tunnel/mocks"
 	"github.com/atmxlab/vpn/test/gen"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestPSHHandler(t *testing.T) {

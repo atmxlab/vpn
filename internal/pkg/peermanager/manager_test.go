@@ -2,9 +2,12 @@ package peermanager_test
 
 import (
 	"context"
+	"sync/atomic"
 	"testing"
+	"time"
 
 	"github.com/atmxlab/vpn/internal/pkg/peermanager"
+	"github.com/atmxlab/vpn/internal/server"
 	"github.com/atmxlab/vpn/test/gen"
 	"github.com/stretchr/testify/require"
 )
@@ -63,12 +66,13 @@ func TestManager(t *testing.T) {
 
 		ctx := context.Background()
 		peer := gen.RandPeer()
+		ttl := 1 * time.Second
 
 		pm := peermanager.New()
 
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
-		require.NoError(t, pm.Add(ctx, peer, gen.RandDuration()))
+		require.NoError(t, pm.Add(ctx, peer, ttl))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 
@@ -83,12 +87,13 @@ func TestManager(t *testing.T) {
 
 		ctx := context.Background()
 		peer := gen.RandPeer()
+		ttl := 1 * time.Second
 
 		pm := peermanager.New()
 
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
-		require.NoError(t, pm.Add(ctx, peer, gen.RandDuration()))
+		require.NoError(t, pm.Add(ctx, peer, ttl))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 
@@ -103,16 +108,17 @@ func TestManager(t *testing.T) {
 
 		ctx := context.Background()
 		peer := gen.RandPeer()
+		ttl := 1 * time.Second
 
 		pm := peermanager.New()
 
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
-		require.NoError(t, pm.Add(ctx, peer, gen.RandDuration()))
+		require.NoError(t, pm.Add(ctx, peer, ttl))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 
-		actualPeer, exists, err := pm.GetByAddrAndExtend(ctx, peer.Addr(), gen.RandDuration())
+		actualPeer, exists, err := pm.GetByAddrAndExtend(ctx, peer.Addr(), ttl)
 		require.NoError(t, err)
 		require.True(t, exists)
 		require.Equal(t, peer, actualPeer)
@@ -140,17 +146,58 @@ func TestManager(t *testing.T) {
 
 		ctx := context.Background()
 		peer := gen.RandPeer()
+		ttl := 1 * time.Second
 
 		pm := peermanager.New()
 
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
-		require.NoError(t, pm.Add(ctx, peer, gen.RandDuration()))
+		require.NoError(t, pm.Add(ctx, peer, ttl))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 
 		has, err := pm.HasPeer(ctx, peer.Addr())
 		require.NoError(t, err)
 		require.True(t, has)
+	})
+
+	t.Run("remove after ttl", func(t *testing.T) {
+		t.Parallel()
+
+		ctx := context.Background()
+		peer := gen.RandPeer()
+
+		pm := peermanager.New()
+
+		require.NoError(t, pm.Add(ctx, peer, 300*time.Millisecond))
+
+		ok, err := pm.HasPeer(ctx, peer.Addr())
+		require.NoError(t, err)
+		require.True(t, ok)
+
+		time.Sleep(350 * time.Millisecond)
+		ok, err = pm.HasPeer(ctx, peer.Addr())
+		require.NoError(t, err)
+		require.False(t, ok)
+	})
+
+	t.Run("execute hooks after ttl", func(t *testing.T) {
+		t.Parallel()
+
+		ctx := context.Background()
+		peer := gen.RandPeer()
+
+		pm := peermanager.New()
+
+		var hookCalled atomic.Bool
+		require.NoError(t, pm.Add(ctx, peer, 300*time.Millisecond, func(p *server.Peer) error {
+			hookCalled.Store(true)
+			return nil
+		}))
+		time.Sleep(350 * time.Millisecond)
+		ok, err := pm.HasPeer(ctx, peer.Addr())
+		require.NoError(t, err)
+		require.False(t, ok)
+		require.True(t, hookCalled.Load())
 	})
 }

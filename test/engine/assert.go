@@ -32,6 +32,18 @@ func UnexpectPeer(addr net.Addr) test.Action {
 	})
 }
 
+func ExpectFreeAllDedicatedIPs() test.Action {
+	return newSimpleAction(func(a test.App) {
+		require.False(a.T(), a.IPDistributor().HasBusy(), "cannot exists busy ips")
+	})
+}
+
+func ExpectBusyDedicatedIP() test.Action {
+	return newSimpleAction(func(a test.App) {
+		require.True(a.T(), a.IPDistributor().HasBusy(), "busy ip must be exists")
+	})
+}
+
 func ExpectTun(packet protocol.TunPacket) test.Action {
 	return newSimpleAction(func(a test.App) {
 		lastPacket, ok := a.Tun().GetLastPacket()

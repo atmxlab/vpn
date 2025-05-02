@@ -23,8 +23,8 @@ type App interface {
 	Tunnel() Tunnel
 	Tun() Tun
 	PeerManager() PeerManager
+	IPDistributor() IPDistributor
 }
-
 type Tunnel interface {
 	WriteToInput(p []byte, addr net.Addr) (n int, err error)
 	GetLastPacket() (*protocol.TunnelPacket, bool)
@@ -37,4 +37,8 @@ type Tun interface {
 
 type PeerManager interface {
 	GetByAddr(ctx context.Context, addr net.Addr) (peer *server.Peer, exists bool, err error)
+}
+
+type IPDistributor interface {
+	HasBusy() bool
 }

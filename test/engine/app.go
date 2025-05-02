@@ -8,11 +8,12 @@ import (
 )
 
 type app struct {
-	t           *testing.T
-	ctx         context.Context
-	tunnel      test.Tunnel
-	tun         test.Tun
-	peerManager test.PeerManager
+	t             *testing.T
+	ctx           context.Context
+	tunnel        test.Tunnel
+	tun           test.Tun
+	peerManager   test.PeerManager
+	ipDistributor test.IPDistributor
 }
 
 func newApp(
@@ -21,13 +22,15 @@ func newApp(
 	tunnel test.Tunnel,
 	tun test.Tun,
 	peerManager test.PeerManager,
+	ipDistributor test.IPDistributor,
 ) *app {
 	return &app{
-		t:           t,
-		ctx:         ctx,
-		tunnel:      tunnel,
-		tun:         tun,
-		peerManager: peerManager,
+		t:             t,
+		ctx:           ctx,
+		tunnel:        tunnel,
+		tun:           tun,
+		peerManager:   peerManager,
+		ipDistributor: ipDistributor,
 	}
 }
 
@@ -49,4 +52,8 @@ func (a *app) Tun() test.Tun {
 
 func (a *app) PeerManager() test.PeerManager {
 	return a.peerManager
+}
+
+func (a *app) IPDistributor() test.IPDistributor {
+	return a.ipDistributor
 }

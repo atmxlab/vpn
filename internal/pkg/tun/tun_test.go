@@ -8,8 +8,8 @@ import (
 	"github.com/atmxlab/vpn/internal/pkg/tun"
 	"github.com/atmxlab/vpn/internal/pkg/tun/mocks"
 	"github.com/atmxlab/vpn/pkg/errors"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestTun_Write(t *testing.T) {

@@ -91,7 +91,7 @@ func New(
 	}()
 
 	return &engine{
-		app:        newApp(t, ctx, tunnelConnStub, embeddedTunStub, pm),
+		app:        newApp(t, ctx, tunnelConnStub, embeddedTunStub, pm, ipDistributor),
 		cancelFunc: cancel,
 		cfg:        cfg,
 	}

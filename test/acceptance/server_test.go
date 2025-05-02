@@ -111,24 +111,26 @@ func TestServer(t *testing.T) {
 	})
 
 	t.Run("keepalive deadline", func(t *testing.T) {
-		t.Skip("waiting developed keepalive logic")
 		t.Parallel()
 
 		client := gen.RandAddr()
 
 		eng := engine.New(
 			t,
-			engine.WithPeerKeepAliveTTL(20*time.Millisecond),
+			engine.WithActionDelay(10*time.Millisecond),
+			engine.WithPeerKeepAliveTTL(100*time.Millisecond),
 		)
 
 		eng.REPLAY(
 			engine.SYN(client),
 			engine.CHECKPOINT(
 				engine.ExpectPeer(client),
+				engine.ExpectBusyDedicatedIP(),
 			),
-			engine.WAIT(40*time.Millisecond),
+			engine.WAIT(100*time.Millisecond),
 			engine.CHECKPOINT(
 				engine.UnexpectPeer(client),
+				engine.ExpectFreeAllDedicatedIPs(),
 			),
 		)
 	})

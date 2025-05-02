@@ -1,8 +1,14 @@
 package stub
 
-import "github.com/atmxlab/vpn/internal/protocol"
+import (
+	"sync"
+
+	"github.com/atmxlab/vpn/internal/protocol"
+)
 
 type EmbeddedTun struct {
+	mu sync.Mutex
+
 	input chan []byte
 
 	output        chan []byte
@@ -31,6 +37,8 @@ func (e *EmbeddedTun) ReadFromOutput(p []byte) (n int, err error) {
 
 func (e *EmbeddedTun) Write(p []byte) (n int, err error) {
 	e.output <- p
+	e.mu.Lock()
+	defer e.mu.Unlock()
 	e.outputPackets = append(e.outputPackets, protocol.NewTunPacket(p))
 
 	return len(p), nil
@@ -52,6 +60,8 @@ func (e *EmbeddedTun) Name() string {
 }
 
 func (e *EmbeddedTun) GetLastPacket() (*protocol.TunPacket, bool) {
+	e.mu.Lock()
+	defer e.mu.Unlock()
 	if len(e.outputPackets) == 0 {
 		return nil, false
 	}

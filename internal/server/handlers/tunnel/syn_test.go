@@ -10,8 +10,8 @@ import (
 	"github.com/atmxlab/vpn/internal/server/handlers/tunnel/mocks"
 	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/atmxlab/vpn/test/gen"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestSYNHandler(t *testing.T) {
@@ -32,11 +32,12 @@ func TestSYNHandler(t *testing.T) {
 		pm.EXPECT().HasPeer(gomock.Any(), tp.Addr()).Return(false, nil)
 
 		pm.EXPECT().
-			Add(gomock.Any(), gomock.Any(), kpaTTL).
+			Add(gomock.Any(), gomock.Any(), kpaTTL, gomock.Any()).
 			DoAndReturn(func(
 				ctx context.Context,
 				peer *server.Peer,
 				kpa time.Duration,
+				afterTTL ...func(*server.Peer) error,
 			) error {
 				require.Equal(t, tp.Addr(), peer.Addr())
 				require.Equal(t, kpa, kpaTTL)

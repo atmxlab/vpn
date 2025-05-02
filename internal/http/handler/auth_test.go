@@ -12,8 +12,8 @@ import (
 	"github.com/atmxlab/vpn/internal/http/handler"
 	"github.com/atmxlab/vpn/internal/http/handler/mocks"
 	mockhttp "github.com/atmxlab/vpn/internal/http/mocks"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 type HTTPTester struct {

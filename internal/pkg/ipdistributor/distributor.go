@@ -73,3 +73,16 @@ func (ipd *Distributor) incIP(ip net.IP) {
 		}
 	}
 }
+
+func (ipd *Distributor) HasBusy() bool {
+	ipd.m.Lock()
+	defer ipd.m.Unlock()
+
+	for _, isBusy := range ipd.ipPool {
+		if isBusy {
+			return true
+		}
+	}
+
+	return false
+}

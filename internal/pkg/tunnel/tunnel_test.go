@@ -10,8 +10,8 @@ import (
 	"github.com/atmxlab/vpn/internal/pkg/tunnel/mocks"
 	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/atmxlab/vpn/test/gen"
-	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
+	"go.uber.org/mock/gomock"
 )
 
 func TestTunnel_Write(t *testing.T) {

@@ -3,11 +3,15 @@ package stub
 import (
 	"io"
 	"net"
+	"sync"
 
 	"github.com/atmxlab/vpn/internal/protocol"
 )
 
 type TunnelConnection struct {
+	mu        sync.Mutex
+	closeOnce sync.Once
+
 	input chan *protocol.TunnelPacket
 
 	output        chan *protocol.TunnelPacket
@@ -26,6 +30,8 @@ func NewTunnelConnection(addr net.Addr, dataChanSize int) *TunnelConnection {
 
 func (t *TunnelConnection) ReadFrom(p []byte) (int, net.Addr, error) {
 	tp, ok := <-t.input
+	// Канал может быть закрыт (e.g. Отмена контекста)
+	// В таком случае отдаем EOF
 	if !ok {
 		return 0, nil, io.EOF
 	}
@@ -40,6 +46,8 @@ func (t *TunnelConnection) WriteTo(p []byte, addr net.Addr) (n int, err error) {
 	tp := protocol.UnmarshalTunnelPacket(addr, p)
 
 	t.output <- tp
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	t.outputPackets = append(t.outputPackets, tp)
 
 	return len(tp.Marshal()), nil
@@ -56,6 +64,8 @@ func (t *TunnelConnection) LocalAddr() net.Addr {
 }
 
 func (t *TunnelConnection) Close() error {
+	t.mu.Lock()
+	defer t.mu.Unlock()
 	close(t.input)
 	close(t.output)
 
@@ -63,6 +73,9 @@ func (t *TunnelConnection) Close() error {
 }
 
 func (t *TunnelConnection) GetLastPacket() (*protocol.TunnelPacket, bool) {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+
 	if len(t.outputPackets) == 0 {
 		return nil, false
 	}

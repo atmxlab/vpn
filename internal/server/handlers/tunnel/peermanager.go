@@ -12,7 +12,12 @@ import (
 //
 //go:generate mock PeerManager
 type PeerManager interface {
-	Add(ctx context.Context, peer *server.Peer, ttl time.Duration) error
+	Add(
+		ctx context.Context,
+		peer *server.Peer,
+		ttl time.Duration,
+		afterTTL ...func(p *server.Peer) error,
+	) error
 	Remove(ctx context.Context, peer *server.Peer) error
 	GetByAddrAndExtend(ctx context.Context, addr net.Addr, ttl time.Duration) (
 		peer *server.Peer,

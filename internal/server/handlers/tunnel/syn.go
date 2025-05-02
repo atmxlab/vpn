@@ -49,7 +49,14 @@ func (h *SYNHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 
 	logrus.Infof("Created new peer with addr: %s and dedicated ip: %s", peer.Addr(), peer.DedicatedIP())
 
-	if err = h.peerManager.Add(ctx, peer, h.keepAliveTTL); err != nil {
+	err = h.peerManager.Add(ctx, peer, h.keepAliveTTL, func(p *server.Peer) error {
+		if localErr := h.ipDistributor.ReleaseIP(p.DedicatedIP()); localErr != nil {
+			return errors.Wrap(localErr, "ipDistributor.ReleaseIP")
+		}
+
+		return nil
+	})
+	if err != nil {
 		return errors.Wrap(err, "peerManager.Add")
 	}
 
