@@ -1,3 +1,15 @@
 {
-
+  "bufferSize": 1500,
+  "peerKeepAliveTTL": "10s",
+  "tun": {
+    "subnetCIDR": "10.0.0.0/24",
+    "mtu": 1500,
+    "tunChanSize": 1000
+  },
+  "tunnel": {
+    "tunnelChanSize": 1000,
+    "network": "udp",
+    "ip": "",
+    "port": 6000
+  }
 }

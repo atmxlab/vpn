@@ -2,7 +2,7 @@ package engine
 
 import (
 	"context"
-	"net"
+	"fmt"
 	"testing"
 	"time"
 
@@ -15,7 +15,6 @@ import (
 	tunnelhandler "github.com/atmxlab/vpn/internal/server/handlers/tunnel"
 	"github.com/atmxlab/vpn/internal/server/router"
 	"github.com/atmxlab/vpn/test"
-	"github.com/atmxlab/vpn/test/gen"
 	"github.com/atmxlab/vpn/test/stub"
 	"github.com/stretchr/testify/require"
 )
@@ -35,32 +34,41 @@ func New(
 	cfg := &Config{
 		actionDelay: 10 * time.Millisecond,
 		serverConfig: &config.ServerConfig{
-			ServerAddr:       gen.RandAddr(),
 			BufferSize:       1500,
-			PeerKeepAliveTTL: 10 * time.Second,
+			PeerKeepAliveTTL: config.Duration(10 * time.Second),
 			Tun: config.ServerTun{
-				Subnet: net.IPNet{
-					IP:   net.ParseIP("10.0.0.1"),
-					Mask: net.CIDRMask(24, 32),
-				},
-				MTU:            1500,
-				TunChanSize:    1000,
+				SubnetCIDR:  "10.0.0.0/24",
+				MTU:         1500,
+				TunChanSize: 1000,
+			},
+			Tunnel: config.ServerTunnel{
 				TunnelChanSize: 1000,
+				Network:        "udp",
+				IP:             "",
+				Port:           6000,
 			},
 		},
 	}
 
 	test.ApplyHooks(cfg, hook)
 
+	serverAddr := stub.NewAddr(
+		cfg.serverConfig.Tunnel.Network,
+		fmt.Sprintf("%s:%d", cfg.serverConfig.Tunnel.IP, cfg.serverConfig.Tunnel.Port),
+	)
+
+	tunSubnet, err := cfg.serverConfig.Tun.Subnet()
+	require.NoError(t, err)
+
 	embeddedTunStub := stub.NewEmbeddedTun("TestTun", int(cfg.serverConfig.Tun.TunChanSize))
 	tn := tun.NewTun(embeddedTunStub)
 
-	tunnelConnStub := stub.NewTunnelConnection(cfg.serverConfig.ServerAddr, int(cfg.serverConfig.Tun.TunnelChanSize))
+	tunnelConnStub := stub.NewTunnelConnection(serverAddr, int(cfg.serverConfig.Tunnel.TunnelChanSize))
 	tunl := tunnel.New(tunnelConnStub)
 
 	pm := peermanager.New()
 
-	ipDistributor, err := ipdistributor.New(cfg.serverConfig.Tun.Subnet)
+	ipDistributor, err := ipdistributor.New(tunSubnet)
 	require.NoError(t, err, "ipdistributor.New")
 
 	routerBuilder := router.NewBuilder()
@@ -70,18 +78,18 @@ func New(
 			b.
 				BufferSize(cfg.serverConfig.BufferSize).
 				TunMtu(cfg.serverConfig.Tun.MTU).
-				TunSubnet(cfg.serverConfig.Tun.Subnet).
+				TunSubnet(tunSubnet).
 				TunChanSize(cfg.serverConfig.Tun.TunChanSize).
-				TunnelChanSize(cfg.serverConfig.Tun.TunnelChanSize)
+				TunnelChanSize(cfg.serverConfig.Tunnel.TunnelChanSize)
 		}).
 		Tun(tn).
 		Tunnel(tunl).
 		TunHandler(tunhandler.NewHandler(tunl, pm)).
 		TunnelHandler(func(build *router.TunnelHandlerBuilder) {
-			build.SYN(tunnelhandler.NewSYNHandler(pm, tunl, ipDistributor, cfg.serverConfig.PeerKeepAliveTTL))
+			build.SYN(tunnelhandler.NewSYNHandler(pm, tunl, ipDistributor, cfg.serverConfig.PeerKeepAliveTTL.ToDuration()))
 			build.FIN(tunnelhandler.NewFINHandler(pm, ipDistributor))
 			build.PSH(tunnelhandler.NewPSHHandler(pm, tn, tunl))
-			build.KPA(tunnelhandler.NewKPAHandler(pm, cfg.serverConfig.PeerKeepAliveTTL))
+			build.KPA(tunnelhandler.NewKPAHandler(pm, cfg.serverConfig.PeerKeepAliveTTL.ToDuration()))
 		})
 
 	rt := routerBuilder.Build()

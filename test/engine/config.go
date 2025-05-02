@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"net"
 	"time"
 
 	"github.com/atmxlab/vpn/internal/config"
@@ -21,12 +20,6 @@ func WithActionDelay(dur time.Duration) func(c *Config) {
 
 func WithPeerKeepAliveTTL(ttl time.Duration) func(c *Config) {
 	return func(c *Config) {
-		c.serverConfig.PeerKeepAliveTTL = ttl
-	}
-}
-
-func WithServerAddr(addr net.Addr) func(c *Config) {
-	return func(c *Config) {
-		c.serverConfig.ServerAddr = addr
+		c.serverConfig.PeerKeepAliveTTL = config.Duration(ttl)
 	}
 }

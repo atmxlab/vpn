@@ -3,6 +3,7 @@ package tun
 import (
 	"context"
 
+	"github.com/atmxlab/vpn/internal/pkg/ip"
 	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/pkg/errors"
 	"golang.org/x/net/ipv4"
@@ -21,6 +22,8 @@ func (h *Handler) Handle(
 	ctx context.Context,
 	packet *protocol.TunPacket,
 ) error {
+	ip.LogHeader(packet.Payload())
+	
 	header, err := ipv4.ParseHeader(packet.Payload())
 	if err != nil {
 		return errors.Wrap(err, "ipv4.ParseHeader")
