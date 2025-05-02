@@ -25,6 +25,7 @@ type App interface {
 	PeerManager() PeerManager
 	IPDistributor() IPDistributor
 }
+
 type Tunnel interface {
 	WriteToInput(p []byte, addr net.Addr) (n int, err error)
 	GetLastPacket() (*protocol.TunnelPacket, bool)

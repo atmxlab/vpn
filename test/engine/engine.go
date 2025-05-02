@@ -40,7 +40,7 @@ func New(
 			PeerKeepAliveTTL: 10 * time.Second,
 			Tun: config.ServerTun{
 				Subnet: net.IPNet{
-					IP:   net.ParseIP("10.0.0.0"),
+					IP:   net.ParseIP("10.0.0.1"),
 					Mask: net.CIDRMask(24, 32),
 				},
 				MTU:            1500,

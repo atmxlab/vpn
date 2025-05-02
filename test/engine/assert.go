@@ -44,7 +44,7 @@ func ExpectBusyDedicatedIP() test.Action {
 	})
 }
 
-func ExpectTun(packet protocol.TunPacket) test.Action {
+func ExpectTun(packet *protocol.TunPacket) test.Action {
 	return newSimpleAction(func(a test.App) {
 		lastPacket, ok := a.Tun().GetLastPacket()
 		require.Truef(a.T(), ok, "tun cannot be empty")
@@ -64,7 +64,18 @@ func ExpectTunnelACK(dst net.Addr) test.Action {
 		lastPacket, ok := a.Tunnel().GetLastPacket()
 
 		require.Truef(a.T(), ok, "tunnel cannot be empty")
-		require.Equal(a.T(), protocol.FlagACK, lastPacket.Header().Flag(), "last tunnel packet must has ack flag")
+		require.Equalf(a.T(), protocol.FlagACK, lastPacket.Header().Flag(), "invalid last tunnel packet: expected [%s], actual [%s]", protocol.FlagACK, lastPacket.Header().Flag())
 		require.Equal(a.T(), dst, lastPacket.Addr(), "invalid destination addr")
+	})
+}
+
+func ExpectTunnelPSH(dst net.Addr, payload protocol.Payload) test.Action {
+	return newSimpleAction(func(a test.App) {
+		lastPacket, ok := a.Tunnel().GetLastPacket()
+
+		require.Truef(a.T(), ok, "tunnel cannot be empty")
+		require.Equalf(a.T(), protocol.FlagPSH, lastPacket.Header().Flag(), "invalid last tunnel packet: expected [%s], actual [%s]", protocol.FlagPSH, lastPacket.Header().Flag())
+		require.Equal(a.T(), dst, lastPacket.Addr(), "invalid destination addr")
+		require.Equal(a.T(), payload, lastPacket.Payload(), "invalid payload")
 	})
 }

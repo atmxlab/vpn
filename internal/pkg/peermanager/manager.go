@@ -89,8 +89,11 @@ func (pm *Manager) GetByDedicatedIP(_ context.Context, ip net.IP) (*server.Peer,
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
 
-	p, ok := pm.indexByDedicatedIP[ip.String()]
-	return p.peer, ok, nil
+	if p, ok := pm.indexByDedicatedIP[ip.String()]; ok {
+		return p.peer, true, nil
+	}
+
+	return nil, false, nil
 }
 
 func (pm *Manager) GetByAddr(_ context.Context, addr net.Addr) (*server.Peer, bool, error) {

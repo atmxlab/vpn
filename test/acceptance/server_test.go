@@ -1,70 +1,15 @@
 package acceptance
 
 import (
+	"net"
 	"testing"
 	"time"
 
+	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/test/engine"
 	"github.com/atmxlab/vpn/test/gen"
+	"github.com/atmxlab/vpn/test/stub"
 )
-
-// TODO: так как некоторые вещи завязаны на время
-//  можно использовать новую фичу гошки с ускорением времени
-
-// func TestServer(t *testing.T) {
-// 	t.Parallel()
-//
-// 	serverIP := gen.RandIP()
-// 	clientIP := gen.RandIP()
-// 	targetIP := gen.RandIP()
-// 	// TODO: движок должен использовать реальные реализации
-// 	//  подменять реализации нужно только если есть сайд эффекты
-// 	eng := engine.NewServer(t, serverIP)
-//
-// 	eng.Replay(
-// 		// Wrote SYN packet into tunnel
-// 		engine.SYN(clientIP),
-// 		// Waiting 10 mls before running next action
-// 		engine.WAIT(10*time.Millisecond),
-// 		// Checkpoint
-// 		engine.ASSERT(
-// 			eng.ExpectPeer(clientIP),
-// 			eng.UnexpectTun(),
-// 			eng.ExpectTunnelACK(),
-// 			func() {
-// 				// custom checks
-// 			},
-// 		),
-// 		engine.PSH(engine.ICMPReq(func(packet *packets.ICMP) {
-// 			// change packet
-// 			packet.SrcIP = eng.DedicatedIP(clientIP)
-// 			packet.DstIP = targetIP
-// 		})),
-// 		// Checkpoint
-// 		engine.ASSERT(
-// 			eng.ExpectPeer(clientIP),
-// 			eng.ExpectTun(),
-// 			eng.ExpectTunnelACK(),
-//
-// 			// rename
-// 			eng.ExpectTunEqualsTunnel(),
-// 		),
-// 		engine.TUN(engine.ICMPResp(func(packet *packets.ICMP) {
-// 			// change packet
-// 			packet.SrcIP = targetIP
-// 			packet.DstIP = clientIP // after masquerading must be client IP
-// 		})),
-// 		// Checkpoint
-// 		engine.ASSERT(
-// 			eng.ExpectPeer(clientIP),
-// 			eng.ExpectTun(),
-// 			eng.ExpectTunnelPSH(),
-//
-// 			// rename
-// 			eng.ExpectTunEqualsTunnel(),
-// 		),
-// 	)
-// }
 
 func TestServer(t *testing.T) {
 	t.Parallel()
@@ -152,6 +97,50 @@ func TestServer(t *testing.T) {
 			engine.CHECKPOINT(
 				engine.UnexpectPeer(client),
 				engine.ExpectEmptyTun(),
+			),
+		)
+	})
+
+	t.Run("push data", func(t *testing.T) {
+		t.Parallel()
+
+		client := gen.RandAddr()
+		payload := gen.RandPayload()
+		eng := engine.New(t)
+
+		eng.REPLAY(
+			engine.SYN(client),
+			engine.CHECKPOINT(
+				engine.ExpectPeer(client),
+				engine.ExpectEmptyTun(),
+				engine.ExpectTunnelACK(client),
+			),
+			engine.PSH(client, payload),
+			engine.CHECKPOINT(
+				engine.ExpectTun(protocol.NewTunPacket(payload)),
+			),
+		)
+	})
+
+	t.Run("receive data", func(t *testing.T) {
+		t.Parallel()
+
+		client := gen.RandAddr()
+		tunPacket := gen.RandTunICMPReq(t, func(h *stub.IPHeader) {
+			h.Dst = net.IPv4(10, 0, 0, 0)
+		})
+		eng := engine.New(t)
+
+		eng.REPLAY(
+			engine.SYN(client),
+			engine.CHECKPOINT(
+				engine.ExpectPeer(client),
+				engine.ExpectEmptyTun(),
+				engine.ExpectTunnelACK(client),
+			),
+			engine.TUN(tunPacket),
+			engine.CHECKPOINT(
+				engine.ExpectTunnelPSH(client, tunPacket.Payload()),
 			),
 		)
 	})

@@ -6,7 +6,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TUN(packet protocol.TunPacket) test.Action {
+func TUN(packet *protocol.TunPacket) test.Action {
 	return newSimpleAction(func(a test.App) {
 		_, err := a.Tun().WriteToInput(packet.Payload())
 		require.NoError(a.T(), err)

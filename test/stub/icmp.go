@@ -1,9 +1,7 @@
 package stub
 
-type ICMPPacket struct {
-}
+import (
+	"golang.org/x/net/icmp"
+)
 
-func (p *ICMPPacket) Marshal() ([]byte, error) {
-	// TODO: implement me
-	return []byte{}, nil
-}
+type ICMPPacket = icmp.Message
