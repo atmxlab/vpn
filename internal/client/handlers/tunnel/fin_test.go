@@ -4,10 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/atmxlab/vpn/internal/server/handlers/tunnel"
-	"github.com/atmxlab/vpn/internal/server/handlers/tunnel/mocks"
+	"github.com/atmxlab/vpn/internal/client/handlers/tunnel"
+	"github.com/atmxlab/vpn/internal/client/handlers/tunnel/mocks"
 	"github.com/atmxlab/vpn/pkg/errors"
-	"github.com/atmxlab/vpn/test/gen"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
 )
@@ -18,41 +17,33 @@ func TestFINHandler(t *testing.T) {
 	t.Run("happy path", func(t *testing.T) {
 		t.Parallel()
 
-		tp := gen.RandTunnelPacket()
-		peer := gen.RandPeer()
-
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		pm := mocks.NewMockPeerManager(ctrl)
-		pm.EXPECT().GetByAddr(gomock.Any(), tp.Addr()).Return(peer, nil)
-		pm.EXPECT().Remove(gomock.Any(), peer).Return(nil)
+		stopper := mocks.NewMockStopper(ctrl)
 
-		ipd := mocks.NewMockIpDistributor(ctrl)
-		ipd.EXPECT().ReleaseIP(peer.DedicatedIP()).Return(nil)
+		stopper.EXPECT().Stop(gomock.Any()).Return(nil)
 
-		h := tunnel.NewFINHandler(pm, ipd)
+		h := tunnel.NewFINHandler(stopper)
 
-		err := h.Handle(context.Background(), tp)
+		err := h.Handle(context.Background(), nil)
 		require.NoError(t, err)
 	})
 
-	t.Run("peer not found", func(t *testing.T) {
+	t.Run("stopper error", func(t *testing.T) {
 		t.Parallel()
-
-		tp := gen.RandTunnelPacket()
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		pm := mocks.NewMockPeerManager(ctrl)
-		pm.EXPECT().GetByAddr(gomock.Any(), tp.Addr()).Return(nil, errors.ErrNotFound)
+		stopper := mocks.NewMockStopper(ctrl)
 
-		ipd := mocks.NewMockIpDistributor(ctrl)
+		stopErr := errors.New("stopper error")
+		stopper.EXPECT().Stop(gomock.Any()).Return(stopErr)
 
-		h := tunnel.NewFINHandler(pm, ipd)
+		h := tunnel.NewFINHandler(stopper)
 
-		err := h.Handle(context.Background(), tp)
-		require.ErrorIs(t, err, errors.ErrNotFound)
+		err := h.Handle(context.Background(), nil)
+		require.ErrorIs(t, err, stopErr)
 	})
 }

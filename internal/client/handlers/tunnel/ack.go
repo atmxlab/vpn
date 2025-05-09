@@ -8,10 +8,12 @@ import (
 	"github.com/atmxlab/vpn/pkg/errors"
 )
 
+//go:generate mock TunConfigurator
 type TunConfigurator interface {
 	ChangeAddr(ctx context.Context, subnet net.IPNet) error
 }
 
+//go:generate mock NetConfigurator
 type NetConfigurator interface {
 	ConfigureRouting(ctx context.Context, subnet net.IPNet) error
 }
@@ -20,6 +22,10 @@ type ACKHandler struct {
 	tunConfigurator TunConfigurator
 	netConfigurator NetConfigurator
 	ipMasc          net.IPMask
+}
+
+func NewACKHandler(tunConfigurator TunConfigurator, netConfigurator NetConfigurator, ipMasc net.IPMask) *ACKHandler {
+	return &ACKHandler{tunConfigurator: tunConfigurator, netConfigurator: netConfigurator, ipMasc: ipMasc}
 }
 
 func (h *ACKHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {

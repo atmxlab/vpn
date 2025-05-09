@@ -16,6 +16,10 @@ type FINHandler struct {
 	stopper Stopper
 }
 
+func NewFINHandler(stopper Stopper) *FINHandler {
+	return &FINHandler{stopper: stopper}
+}
+
 func (h *FINHandler) Handle(ctx context.Context, _ *protocol.TunnelPacket) error {
 	if err := h.stopper.Stop(ctx); err != nil {
 		return errors.Wrap(err, "failed to stop client connection")

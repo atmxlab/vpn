@@ -4,8 +4,9 @@ import (
 	"context"
 	"testing"
 
-	"github.com/atmxlab/vpn/internal/server/handlers/tunnel"
-	"github.com/atmxlab/vpn/internal/server/handlers/tunnel/mocks"
+	"github.com/atmxlab/vpn/internal/client/handlers/tunnel"
+	"github.com/atmxlab/vpn/internal/client/handlers/tunnel/mocks"
+	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/atmxlab/vpn/test/gen"
 	"github.com/stretchr/testify/require"
 	"go.uber.org/mock/gomock"
@@ -18,43 +19,34 @@ func TestPSHHandler(t *testing.T) {
 		t.Parallel()
 
 		tp := gen.RandTunnelPacket()
-
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		pm := mocks.NewMockPeerManager(ctrl)
-		pm.EXPECT().HasPeer(gomock.Any(), tp.Addr()).Return(true, nil)
+		tun := mocks.NewMockTun(ctrl)
 
-		tnl := mocks.NewMockTunnel(ctrl)
+		tun.EXPECT().Write(tp.Payload()).Return(len(tp.Payload()), nil)
 
-		tn := mocks.NewMockTun(ctrl)
-		tn.EXPECT().Write(tp.Payload()).Return(0, nil)
-
-		h := tunnel.NewPSHHandler(pm, tn, tnl)
+		h := tunnel.NewPSHHandler(tun)
 
 		err := h.Handle(context.Background(), tp)
 		require.NoError(t, err)
 	})
 
-	t.Run("peer not found", func(t *testing.T) {
+	t.Run("tun error", func(t *testing.T) {
 		t.Parallel()
 
 		tp := gen.RandTunnelPacket()
-
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		pm := mocks.NewMockPeerManager(ctrl)
-		pm.EXPECT().HasPeer(gomock.Any(), tp.Addr()).Return(false, nil)
+		tun := mocks.NewMockTun(ctrl)
 
-		tnl := mocks.NewMockTunnel(ctrl)
-		tnl.EXPECT().SYN(tp.Addr(), nil).Return(0, nil)
+		tunErr := errors.New("tun error")
+		tun.EXPECT().Write(tp.Payload()).Return(0, tunErr)
 
-		tn := mocks.NewMockTun(ctrl)
-
-		h := tunnel.NewPSHHandler(pm, tn, tnl)
+		h := tunnel.NewPSHHandler(tun)
 
 		err := h.Handle(context.Background(), tp)
-		require.NoError(t, err)
+		require.ErrorIs(t, err, tunErr)
 	})
 }

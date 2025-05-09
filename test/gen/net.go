@@ -35,3 +35,12 @@ func RandIP() net.IP {
 	).
 		To4()
 }
+
+func RandIPMask() net.IPMask {
+	return net.IPv4Mask(
+		RandByte(),
+		RandByte(),
+		RandByte(),
+		RandByte(),
+	)
+}
