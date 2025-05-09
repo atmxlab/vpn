@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"net"
 
 	"github.com/atmxlab/vpn/cmd"
@@ -23,7 +24,7 @@ import (
 func main() {
 	defer cmd.Recover()
 
-	ctx, cancel := cmd.SignalCtx()
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	const configPath = "./config/client.json"

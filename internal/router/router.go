@@ -64,8 +64,6 @@ type Router struct {
 func (r *Router) Run(ctx context.Context) error {
 	defer r.tun.Close()
 	defer r.tunnel.Close()
-	defer close(r.tunPackets)
-	defer close(r.tunnelPackets)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -75,13 +73,16 @@ func (r *Router) Run(ctx context.Context) error {
 	r.eg, ctx = errgroup.WithContext(ctx)
 
 	r.eg.Go(func() error {
+		defer close(r.tunPackets)
 		if err := r.listenTun(ctx); err != nil {
 			return errors.Wrap(err, "listen TUN")
 		}
+
 		return nil
 	})
 
 	r.eg.Go(func() error {
+		defer close(r.tunnelPackets)
 		if err := r.listenTunnel(ctx); err != nil {
 			return errors.Wrap(err, "listen Tunnel")
 		}

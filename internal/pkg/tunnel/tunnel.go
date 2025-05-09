@@ -76,7 +76,7 @@ func (t *Tunnel) Write(tunnelPacket *protocol.TunnelPacket) (int, error) {
 		return 0, errors.Wrap(err, "conn.WriteTo")
 	}
 
-	logrus.Debugf("Write to TUNNEL %d bytes", n)
+	logrus.Debugf("Write TUNNEL: flag: [%s], len: [%d],", tunnelPacket.Header().Flag(), n)
 
 	return n, nil
 }
@@ -109,7 +109,7 @@ func (t *Tunnel) ReadFromWithContext(ctx context.Context, buf []byte) (int, net.
 			return 0, nil, errors.Join(err, ctx.Err())
 		}
 
-		logrus.Warn("Waiting ending read from Tunnel...")
+		logrus.Warn("Waiting ending read from TUNNEL...")
 		wg.Wait()
 
 		return 0, nil, ctx.Err()

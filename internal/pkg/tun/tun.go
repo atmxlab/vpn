@@ -28,7 +28,13 @@ func NewTun(tun EmbeddedTun) *Tun {
 }
 
 func (t *Tun) Write(buf []byte) (int, error) {
-	return t.tun.Write(buf)
+	n, err := t.tun.Write(buf)
+	if err != nil {
+		return n, errors.Wrap(err, "tun.Write")
+	}
+
+	logrus.Debugf("Write to TUN: len: [%d]", n)
+	return n, nil
 }
 
 // ReadWithContext - необходим, чтобы учитывать отмену контекста при чтении из потока
@@ -57,7 +63,7 @@ func (t *Tun) ReadWithContext(ctx context.Context, buf []byte) (int, error) {
 			return 0, errors.Join(err, ctx.Err())
 		}
 
-		logrus.Warn("Waiting ending read from Tunnel...")
+		logrus.Warn("Waiting ending read from TUN...")
 		wg.Wait()
 
 		return 0, ctx.Err()

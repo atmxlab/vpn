@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/atmxlab/vpn/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -61,28 +62,40 @@ func (c *Client) Run(ctx context.Context, connTimeout time.Duration) (err error)
 	c.eg, ctx = errgroup.WithContext(ctx)
 
 	defer func() {
+		if err != nil {
+			cancel()
+			logrus.Warnf("Client app error: %v", err)
+		}
+
+		logrus.Info("Waiting app closing...")
 		if egErr := c.eg.Wait(); egErr != nil {
 			err = errors.Join(err, errors.Wrap(egErr, "error group wait"))
 		}
 	}()
-	defer cancel()
 
 	c.eg.Go(func() error {
+		logrus.Debug("Starting router")
+		defer logrus.Warn("Stopped router")
 		if err = c.router.Run(ctx); err != nil {
 			return errors.Wrap(err, "failed to start router")
 		}
 		return nil
 	})
 
+	logrus.Info("Init connection")
 	if err = c.synAction.Run(ctx); err != nil {
 		return errors.Wrap(err, "failed to start syn action")
 	}
 
+	logrus.Info("Waiting connection signal...")
 	if err = c.connSignal.WaitWithTimeout(connTimeout); err != nil {
 		return errors.Wrap(err, "failed to wait for connection signal")
 	}
+	logrus.Info("Connected to server!")
 
 	c.eg.Go(func() error {
+		logrus.Debug("Starting KPA action")
+		defer logrus.Warn("stopped KPA action")
 		if err = c.kpaAction.Run(ctx); err != nil {
 			return errors.Wrap(err, "failed to start kpa action")
 		}
