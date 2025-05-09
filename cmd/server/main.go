@@ -11,9 +11,9 @@ import (
 	"github.com/atmxlab/vpn/internal/pkg/peermanager"
 	"github.com/atmxlab/vpn/internal/pkg/tun"
 	"github.com/atmxlab/vpn/internal/pkg/tunnel"
+	"github.com/atmxlab/vpn/internal/router"
 	tunhandler "github.com/atmxlab/vpn/internal/server/handlers/tun"
 	tunnelhandler "github.com/atmxlab/vpn/internal/server/handlers/tunnel"
-	"github.com/atmxlab/vpn/internal/server/router"
 	"github.com/atmxlab/vpn/pkg/jsonconfig"
 	"github.com/sirupsen/logrus"
 )
