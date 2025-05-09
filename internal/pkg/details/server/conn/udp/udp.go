@@ -10,12 +10,7 @@ type Tunnel struct {
 	*net.UDPConn
 }
 
-func New(addr net.Addr) (*Tunnel, error) {
-	udpAddr, err := net.ResolveUDPAddr(addr.Network(), addr.String())
-	if err != nil {
-		return nil, errors.Wrap(err, "net.ResolveUDPAddr")
-	}
-
+func New(udpAddr *net.UDPAddr) (*Tunnel, error) {
 	conn, err := net.ListenUDP("udp", udpAddr)
 	if err != nil {
 		return nil, errors.Wrap(err, "net.ListenUDP")

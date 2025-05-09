@@ -109,6 +109,11 @@ func (b *TunnelHandlerBuilder) SYN(handler TunnelHandler) *TunnelHandlerBuilder 
 	return b
 }
 
+func (b *TunnelHandlerBuilder) ACK(handler TunnelHandler) *TunnelHandlerBuilder {
+	b.tunnelHandlerByFlag[protocol.FlagACK] = handler
+	return b
+}
+
 func (b *TunnelHandlerBuilder) FIN(handler TunnelHandler) *TunnelHandlerBuilder {
 	b.tunnelHandlerByFlag[protocol.FlagFIN] = handler
 	return b

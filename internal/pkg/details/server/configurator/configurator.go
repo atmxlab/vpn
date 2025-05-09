@@ -1,4 +1,4 @@
-package route
+package configurator
 
 import (
 	"net"

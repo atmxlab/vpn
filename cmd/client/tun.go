@@ -2,7 +2,6 @@ package main
 
 import (
 	"bytes"
-	"net"
 	"strconv"
 
 	"github.com/atmxlab/vpn/pkg/command"
@@ -11,7 +10,7 @@ import (
 	"github.com/songgao/water"
 )
 
-func setupTun(subnet net.IPNet, mtu uint16) (*water.Interface, error) {
+func setupTun(mtu uint16) (*water.Interface, error) {
 	cfg := water.Config{
 		DeviceType: water.TUN,
 	}
@@ -36,14 +35,6 @@ func setupTun(subnet net.IPNet, mtu uint16) (*water.Interface, error) {
 				return nil
 			})
 			b.Cmd("ip", "link", "set", "dev", iface.Name(), "mtu", strconv.Itoa(int(mtu)))
-		}).
-		Add(func(b *command.Builder) {
-			b.Before(func(cmd command.Command) error {
-				logrus.Infof("Назначаем IP адрес: [%s], для созданного интерфейса: [%s]", subnet.IP, iface.Name())
-				logrus.Infof("Run cmd: [%s]", cmd.String())
-				return nil
-			})
-			b.Cmd("ip", "addr", "add", subnet.String(), "dev", iface.Name())
 		}).
 		Add(func(b *command.Builder) {
 			b.Before(func(cmd command.Command) error {

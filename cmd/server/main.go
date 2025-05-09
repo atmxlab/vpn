@@ -3,7 +3,7 @@ package main
 import (
 	"github.com/atmxlab/vpn/cmd"
 	"github.com/atmxlab/vpn/internal/config"
-	"github.com/atmxlab/vpn/internal/pkg/details/route"
+	"github.com/atmxlab/vpn/internal/pkg/details/server/configurator"
 	"github.com/atmxlab/vpn/internal/pkg/ipdistributor"
 	_ "github.com/atmxlab/vpn/internal/pkg/logger"
 	"github.com/atmxlab/vpn/internal/pkg/peermanager"
@@ -17,7 +17,7 @@ import (
 
 func main() {
 	defer cmd.Recover()
-	
+
 	ctx, cancel := cmd.SignalCtx()
 	defer cancel()
 
@@ -39,7 +39,7 @@ func main() {
 	ipDistributor, err := ipdistributor.New(tunSubnet)
 	cmd.Exitf(err, "ipdistributor.New")
 
-	cmd.Exitf(setupOS(route.NewConfigurator(), cfg), "setupOS")
+	cmd.Exitf(setupOS(configurator.NewConfigurator(), cfg), "setupOS")
 
 	routerBuilder := router.NewBuilder()
 

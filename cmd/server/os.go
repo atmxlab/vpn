@@ -29,17 +29,17 @@ func setupOS(rc RouteConfigurator, cfg config.ServerConfig) error {
 		return errors.Wrap(err, "cfg.Tun.Subnet")
 	}
 
-	if err := rc.EnableIPForward(); err != nil {
+	if err = rc.EnableIPForward(); err != nil {
 		return errors.Wrap(err, "routeConfigurator.EnableIPForward")
 	}
 	logrus.Debug("Route configurator configured IP forwarding")
 
-	if err := rc.ConfigureFirewall(tunSubnet); err != nil {
+	if err = rc.ConfigureFirewall(tunSubnet); err != nil {
 		return errors.Wrap(err, "routeConfigurator.ConfigureFirewall")
 	}
 	logrus.Debug("Route configurator configured firewall")
 
-	if err := rc.SetDefaultRoute(tunSubnet); err != nil {
+	if err = rc.SetDefaultRoute(tunSubnet); err != nil {
 		return errors.Wrap(err, "routeConfigurator.SetDefaultRoute")
 	}
 	logrus.Debug("Route configurator configured default route")

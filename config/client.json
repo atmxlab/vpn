@@ -1,0 +1,17 @@
+{
+  "bufferSize": 1500,
+  "keepAliveTickDuration": "5s",
+  "tun": {
+    "ipMask": "255.255.255.0",
+    "mtu": 1500,
+    "tunChanSize": 1000
+  },
+  "tunnel": {
+    "tunnelChanSize": 1000,
+    "network": "udp",
+    "ip": "",
+    "port": 6000,
+    "serverIP": "192.168.0.30",
+    "serverPort": 6000
+  }
+}

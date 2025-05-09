@@ -7,21 +7,21 @@ import (
 	"github.com/atmxlab/vpn/pkg/errors"
 )
 
-type Signal struct {
+type Signaller struct {
 	signal chan struct{}
 }
 
-func NewSignal() *Signal {
-	return &Signal{
+func NewSignaller() *Signaller {
+	return &Signaller{
 		signal: make(chan struct{}, 1),
 	}
 }
 
-func (s *Signal) Wait() {
+func (s *Signaller) Wait() {
 	<-s.signal
 }
 
-func (s *Signal) WaitWithTimeout(timeout time.Duration) error {
+func (s *Signaller) WaitWithTimeout(timeout time.Duration) error {
 	select {
 	case <-time.After(timeout):
 		return errors.DeadlineExceeded("waiting signal")
@@ -30,16 +30,16 @@ func (s *Signal) WaitWithTimeout(timeout time.Duration) error {
 	}
 }
 
-func (s *Signal) Close() {
+func (s *Signaller) Close() {
 	close(s.signal)
 }
 
-func (s *Signal) After(ctx context.Context, callback func(context.Context) error) error {
+func (s *Signaller) After(ctx context.Context, callback func(context.Context) error) error {
 	s.Wait()
 	return callback(ctx)
 }
 
-func (s *Signal) Signal(_ context.Context) error {
+func (s *Signaller) Signal(_ context.Context) error {
 	select {
 	case s.signal <- struct{}{}:
 		return nil
