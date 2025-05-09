@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 
+	"github.com/atmxlab/vpn/cmd"
 	"github.com/atmxlab/vpn/internal/config"
 	"github.com/atmxlab/vpn/internal/pkg/details/conn/server/udp"
 	"github.com/atmxlab/vpn/internal/pkg/tunnel"
@@ -17,13 +18,13 @@ func setupTunnelConn(cfg config.ServerConfig) tunnel.Connection {
 			cfg.Tunnel.Network,
 			fmt.Sprintf("%s:%d", cfg.Tunnel.IP, cfg.Tunnel.Port),
 		)
-		exitf(err, "net.ResolveUDPAddr")
+		cmd.exitf(err, "net.ResolveUDPAddr")
 		conn, err := udp.New(udpAddr)
-		exitf(err, "udp.New")
+		cmd.exitf(err, "udp.New")
 
 		return conn
 	default:
-		exitf(errors.New("invalid tunnel network"), "unexpected network: %s", cfg.Tunnel.Network)
+		cmd.exitf(errors.New("invalid tunnel network"), "unexpected network: %s", cfg.Tunnel.Network)
 		return nil
 	}
 }

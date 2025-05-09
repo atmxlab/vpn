@@ -33,14 +33,14 @@ type ACKHandler struct {
 func NewACKHandler(
 	tunConfigurator TunConfigurator,
 	netConfigurator NetConfigurator,
-	ipMasc net.IPMask,
 	connectSignaller Signaller,
+	ipMasc net.IPMask,
 ) *ACKHandler {
 	return &ACKHandler{
 		tunConfigurator:  tunConfigurator,
 		netConfigurator:  netConfigurator,
-		ipMasc:           ipMasc,
 		connectSignaller: connectSignaller,
+		ipMasc:           ipMasc,
 	}
 }
 
@@ -63,7 +63,7 @@ func (h *ACKHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 		return errors.Wrap(err, "failed to configure routing")
 	}
 
-	if err = h.connectSignaller.Signal(ctx); err != nil {
+	if err = h.connectSignaller.Signal(ctx); errors.IsSomeBut(err, errors.ErrAlreadyExists) {
 		return errors.Wrap(err, "failed to signal connect")
 	}
 

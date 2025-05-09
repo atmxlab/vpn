@@ -1,9 +1,7 @@
 package main
 
 import (
-	"context"
-	"runtime/debug"
-
+	"github.com/atmxlab/vpn/cmd"
 	"github.com/atmxlab/vpn/internal/config"
 	"github.com/atmxlab/vpn/internal/pkg/details/route"
 	"github.com/atmxlab/vpn/internal/pkg/ipdistributor"
@@ -15,39 +13,33 @@ import (
 	tunhandler "github.com/atmxlab/vpn/internal/server/handlers/tun"
 	tunnelhandler "github.com/atmxlab/vpn/internal/server/handlers/tunnel"
 	"github.com/atmxlab/vpn/pkg/jsonconfig"
-	"github.com/sirupsen/logrus"
 )
 
 func main() {
-	defer func() {
-		if err := recover(); err != nil {
-			logrus.Errorf("Panic recovered: %v", err)
-			logrus.Fatalf("Stack trace:\n%s", debug.Stack())
-		}
-	}()
-
-	ctx, cancel := context.WithCancel(context.Background())
+	defer cmd.Recover()
+	
+	ctx, cancel := cmd.SignalCtx()
 	defer cancel()
 
 	const configPath = "./config/server.json"
 
 	cfg, err := jsonconfig.Load[config.ServerConfig](configPath)
-	exitf(err, "jsonconfig.Load")
+	cmd.Exitf(err, "jsonconfig.Load")
 
 	tunSubnet, err := cfg.Tun.Subnet()
-	exitf(err, "cfg.Tun.Subnet")
+	cmd.Exitf(err, "cfg.Tun.Subnet")
 
 	embeddedTun, err := setupTun(tunSubnet, cfg.Tun.MTU)
-	exitf(err, "setupTun")
+	cmd.Exitf(err, "setupTun")
 
 	tn := tun.NewTun(embeddedTun)
 	tunl := tunnel.New(setupTunnelConn(cfg))
 	pm := peermanager.New()
 
 	ipDistributor, err := ipdistributor.New(tunSubnet)
-	exitf(err, "ipdistributor.New")
+	cmd.Exitf(err, "ipdistributor.New")
 
-	exitf(setupOS(route.NewConfigurator(), cfg), "setupOS")
+	cmd.Exitf(setupOS(route.NewConfigurator(), cfg), "setupOS")
 
 	routerBuilder := router.NewBuilder()
 
@@ -70,5 +62,5 @@ func main() {
 
 	rt := routerBuilder.Build()
 
-	exitf(rt.Run(ctx), "router.Run")
+	cmd.Exitf(rt.Run(ctx), "router.Run")
 }

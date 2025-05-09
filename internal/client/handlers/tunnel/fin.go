@@ -9,7 +9,7 @@ import (
 
 //go:generate mock Closer
 type Closer interface {
-	Close(ctx context.Context) error
+	Close() error
 }
 
 type FINHandler struct {
@@ -20,8 +20,8 @@ func NewFINHandler(closer Closer) *FINHandler {
 	return &FINHandler{closer: closer}
 }
 
-func (h *FINHandler) Handle(ctx context.Context, _ *protocol.TunnelPacket) error {
-	if err := h.closer.Close(ctx); err != nil {
+func (h *FINHandler) Handle(_ context.Context, _ *protocol.TunnelPacket) error {
+	if err := h.closer.Close(); err != nil {
 		return errors.Wrap(err, "failed to close client connection")
 	}
 

@@ -25,7 +25,7 @@ type SynAction interface {
 
 //go:generate mock Signaller
 type Signaller interface {
-	WaitWithTimeout(ctx context.Context, timeout time.Duration) error
+	WaitWithTimeout(timeout time.Duration) error
 }
 
 type Client struct {
@@ -78,7 +78,7 @@ func (c *Client) Run(ctx context.Context, connTimeout time.Duration) (err error)
 		return errors.Wrap(err, "failed to start syn action")
 	}
 
-	if err = c.connSignal.WaitWithTimeout(ctx, connTimeout); err != nil {
+	if err = c.connSignal.WaitWithTimeout(connTimeout); err != nil {
 		return errors.Wrap(err, "failed to wait for connection signal")
 	}
 

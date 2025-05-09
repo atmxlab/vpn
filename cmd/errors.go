@@ -1,16 +1,16 @@
-package main
+package cmd
 
 import (
 	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
 
-func exitf(err error, msg string, a ...any) {
+func Exitf(err error, msg string, a ...any) {
 	if err != nil {
-		exit(errors.Wrapf(err, msg, a...))
+		Exit(errors.Wrapf(err, msg, a...))
 	}
 }
 
-func exit(err error) {
+func Exit(err error) {
 	logrus.Fatal(err.Error())
 }
