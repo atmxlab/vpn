@@ -14,3 +14,7 @@ func (p Payload) IP() (net.IP, error) {
 
 	return net.IPv4(p[0], p[1], p[2], p[3]), nil
 }
+
+func (p Payload) Len() int {
+	return len(p)
+}

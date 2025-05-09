@@ -7,9 +7,14 @@ import (
 )
 
 func (r *Router) consumeTun(ctx context.Context) error {
+	log := logrus.WithField("Namespace", "TUN")
+
 	for packet := range r.tunPackets {
 		if err := r.tunHandler.Handle(ctx, packet); err != nil {
-			logrus.Errorf("Failed to handle TUN packet %+v: %v", packet, err)
+			log.
+				WithField("Len", len(packet.Payload())).
+				WithError(err).
+				Error("Failed to handle packet")
 		}
 	}
 
@@ -17,16 +22,26 @@ func (r *Router) consumeTun(ctx context.Context) error {
 }
 
 func (r *Router) consumeTunnel(ctx context.Context) error {
+	log := logrus.WithField("Namespace", "TUNNEL")
+	
 	for packet := range r.tunnelPackets {
-		logrus.Debugf("Readed from tunnel channel: flag=[%s]", packet.Header().Flag())
+		log = log.
+			WithField("Namespace", "TUNNEL").
+			WithField("Flag", packet.Header().Flag()).
+			WithField("Len", len(packet.Payload()))
+
+		log.Debug("Read packet")
+
 		handler, ok := r.tunnelHandlerByFlag[packet.Header().Flag()]
 		if !ok {
-			logrus.Errorf("Failed to find handler by flag=[%s]", packet.Header().Flag())
+			log.Errorf("Failed to find handler")
 			continue
 		}
 
 		if err := handler.Handle(ctx, packet); err != nil {
-			logrus.Errorf("Failed to handle TUNNEL packet %+v: %v", packet, err)
+			log.
+				WithError(err).
+				Errorf("Failed to handle packet")
 		}
 	}
 

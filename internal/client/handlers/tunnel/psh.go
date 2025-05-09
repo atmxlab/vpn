@@ -7,7 +7,6 @@ import (
 	"github.com/atmxlab/vpn/internal/pkg/ip"
 	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 //go:generate mock Tun
@@ -24,14 +23,16 @@ func NewPSHHandler(tun Tun) *PSHHandler {
 }
 
 func (h *PSHHandler) Handle(_ context.Context, packet *protocol.TunnelPacket) error {
+	l := log(packet)
+
+	l.Debug("Handle packet")
+
 	ip.LogHeader(packet.Payload())
 
-	n, err := h.tun.Write(packet.Payload())
+	_, err := h.tun.Write(packet.Payload())
 	if err != nil {
 		return errors.Wrap(err, "tun.Write")
 	}
-
-	logrus.Debugf("Write bytes to TUN: len=[%d]", n)
 
 	return nil
 }

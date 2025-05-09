@@ -15,7 +15,10 @@ func setupTunnelConn(cfg config.ClientConfig) tunnel.Connection {
 	switch cfg.Tunnel.Network {
 	case "udp":
 		serverUDPAddr := resolveServerAddr(cfg)
-		clientUDPAddr := resolveClientAddr(cfg)
+		var clientUDPAddr *net.UDPAddr
+		if cfg.Tunnel.IP != "" && cfg.Tunnel.Port != 0 {
+			clientUDPAddr = resolveClientAddr(cfg)
+		}
 
 		conn, err := udp.New(clientUDPAddr, serverUDPAddr)
 		cmd.Exitf(err, "udp.New")

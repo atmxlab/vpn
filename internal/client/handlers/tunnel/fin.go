@@ -20,7 +20,11 @@ func NewFINHandler(closer Closer) *FINHandler {
 	return &FINHandler{closer: closer}
 }
 
-func (h *FINHandler) Handle(_ context.Context, _ *protocol.TunnelPacket) error {
+func (h *FINHandler) Handle(_ context.Context, packet *protocol.TunnelPacket) error {
+	l := log(packet)
+
+	l.Debug("Handle packet")
+
 	if err := h.closer.Close(); err != nil {
 		return errors.Wrap(err, "failed to close client connection")
 	}

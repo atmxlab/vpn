@@ -45,10 +45,18 @@ func NewACKHandler(
 }
 
 func (h *ACKHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
+	l := log(packet)
+
+	l.Debug("Handle packet")
+
 	dedicatedIP, err := packet.Payload().IP()
 	if err != nil {
 		return errors.Wrap(err, "failed to decode ip address from payload")
 	}
+
+	l.
+		WithField("DedicatedIP", dedicatedIP).
+		Debug("Got dedicated IP from payload")
 
 	subnet := net.IPNet{
 		IP:   dedicatedIP,

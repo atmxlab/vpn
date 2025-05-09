@@ -76,7 +76,11 @@ func (t *Tunnel) Write(tunnelPacket *protocol.TunnelPacket) (int, error) {
 		return 0, errors.Wrap(err, "conn.WriteTo")
 	}
 
-	logrus.Debugf("Write TUNNEL: flag: [%s], len: [%d],", tunnelPacket.Header().Flag(), n)
+	logrus.
+		WithField("Namespace", "TUNNEL").
+		WithField("Flag", tunnelPacket.Header().Flag()).
+		WithField("Len", n).
+		Debug("Write")
 
 	return n, nil
 }

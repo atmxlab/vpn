@@ -7,6 +7,7 @@ import (
 
 	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/pkg/errors"
+	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -65,6 +66,8 @@ func (r *Router) Run(ctx context.Context) error {
 	defer r.tun.Close()
 	defer r.tunnel.Close()
 
+	log := logrus.WithField("Namespace", "ROUTER")
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -74,6 +77,9 @@ func (r *Router) Run(ctx context.Context) error {
 
 	r.eg.Go(func() error {
 		defer close(r.tunPackets)
+		defer log.Warn("Stop listen tun")
+
+		log.Info("Listen tun...")
 		if err := r.listenTun(ctx); err != nil {
 			return errors.Wrap(err, "listen TUN")
 		}
@@ -83,6 +89,9 @@ func (r *Router) Run(ctx context.Context) error {
 
 	r.eg.Go(func() error {
 		defer close(r.tunnelPackets)
+		defer log.Warn("Stop listen tunnel")
+
+		log.Info("Listen tunnel...")
 		if err := r.listenTunnel(ctx); err != nil {
 			return errors.Wrap(err, "listen Tunnel")
 		}
@@ -90,6 +99,9 @@ func (r *Router) Run(ctx context.Context) error {
 	})
 
 	r.eg.Go(func() error {
+		defer log.Warn("Stop consume tun")
+
+		log.Info("Consume tun...")
 		if err := r.consumeTun(ctx); err != nil {
 			return errors.Wrap(err, "tun consumer")
 		}
@@ -97,12 +109,16 @@ func (r *Router) Run(ctx context.Context) error {
 	})
 
 	r.eg.Go(func() error {
+		defer log.Warn("Stop consume tunnel")
+
+		log.Info("Consume tunnel...")
 		if err := r.consumeTunnel(ctx); err != nil {
 			return errors.Wrap(err, "tunnel consumer")
 		}
 		return nil
 	})
 
+	log.Info("Wait...")
 	if err := r.eg.Wait(); err != nil {
 		return errors.Wrap(err, "error group wait")
 	}

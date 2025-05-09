@@ -7,7 +7,6 @@ import (
 	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/internal/server"
 	"github.com/atmxlab/vpn/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type SYNHandler struct {
@@ -32,6 +31,10 @@ func NewSYNHandler(
 }
 
 func (h *SYNHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
+	l := log(packet)
+
+	l.Debug("Handle packet")
+
 	has, err := h.peerManager.HasPeer(ctx, packet.Addr())
 	if err != nil {
 		return errors.Wrap(err, "peerManager.GetByAddr")
@@ -47,8 +50,6 @@ func (h *SYNHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 
 	peer := server.NewPeer(acquiredIP, packet.Addr())
 
-	logrus.Infof("Created new peer with addr: %s and dedicated ip: %s", peer.Addr(), peer.DedicatedIP())
-
 	err = h.peerManager.Add(ctx, peer, h.keepAliveTTL, func(p *server.Peer) error {
 		if localErr := h.ipDistributor.ReleaseIP(p.DedicatedIP()); localErr != nil {
 			return errors.Wrap(localErr, "ipDistributor.ReleaseIP")
@@ -59,6 +60,10 @@ func (h *SYNHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 	if err != nil {
 		return errors.Wrap(err, "peerManager.Add")
 	}
+
+	l.
+		WithField("DedicatedIP", peer.DedicatedIP()).
+		Info("Created new peer")
 
 	if _, err = h.tunnel.ACK(peer.Addr(), peer.DedicatedIP().To4()); err != nil {
 		return errors.Wrap(err, "tunnel.ACK")

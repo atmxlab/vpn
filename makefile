@@ -37,6 +37,8 @@ test-env-up:
 test-env-down:
 	docker-compose down
 
+test-env-refresh: test-env-down test-env-up
+
 mockgen\:install:
 	go install github.com/golang/mock/mockgen@v1.6.0
 
@@ -47,7 +49,7 @@ exec\:client:
 	docker-compose exec client bash
 
 exec\:server:
-	docker-compose exec client bash
+	docker-compose exec server bash
 
 exec\:target:
-	docker-compose exec client bash
+	docker-compose exec target bash

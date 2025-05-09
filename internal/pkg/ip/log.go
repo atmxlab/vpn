@@ -7,12 +7,20 @@ import (
 
 func LogHeader(frame []byte) {
 	header, err := ipv4.ParseHeader(frame)
-
 	if err != nil {
-		logrus.Warnf("Parse ip header error: %v", err)
+		logrus.
+			WithError(err).
+			Warn("Failed to parse IP header")
+
 		return
 	}
 
-	logrus.Infof("SRC: %s -> DST: %s", header.Src, header.Dst)
-	logrus.Debugf("PROTOCOL: %d; ID: %d; CHECKSUM: %d; TOTAL LEN: %d;", header.Protocol, header.ID, header.Checksum, header.TotalLen)
+	logrus.
+		WithField("SRC", header.Src).
+		WithField("DST", header.Dst).
+		WithField("VERSION", header.Version).
+		WithField("PROTOCOL", header.Protocol).
+		WithField("CHECKSUM", header.Checksum).
+		WithField("LEN", header.Len).
+		Debugf("%s -> %s", header.Src, header.Dst)
 }

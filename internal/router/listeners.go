@@ -9,6 +9,8 @@ import (
 )
 
 func (r *Router) listenTun(ctx context.Context) error {
+	log := logrus.WithField("Namespace", "TUN")
+
 	for {
 		buf := make([]byte, r.cfg.bufferSize)
 
@@ -19,7 +21,9 @@ func (r *Router) listenTun(ctx context.Context) error {
 
 		select {
 		case <-ctx.Done():
-			logrus.Warnf("Context canceled: %v", ctx.Err())
+			log.
+				WithError(ctx.Err()).
+				Warn("Stop listening because context canceled")
 			return ctx.Err()
 		case r.tunPackets <- protocol.NewTunPacket(buf[:n]):
 		}
@@ -27,6 +31,7 @@ func (r *Router) listenTun(ctx context.Context) error {
 }
 
 func (r *Router) listenTunnel(ctx context.Context) error {
+	log := logrus.WithField("Namespace", "TUNNEL")
 	for {
 		buf := make([]byte, r.cfg.bufferSize)
 
@@ -37,7 +42,9 @@ func (r *Router) listenTunnel(ctx context.Context) error {
 
 		select {
 		case <-ctx.Done():
-			logrus.Warnf("Context canceled: %v", ctx.Err())
+			log.
+				WithError(ctx.Err()).
+				Warn("Stop listening because context canceled")
 			return ctx.Err()
 		case r.tunnelPackets <- protocol.UnmarshalTunnelPacket(addr, buf[:n]):
 		}

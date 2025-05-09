@@ -5,7 +5,6 @@ import (
 
 	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/pkg/errors"
-	"github.com/sirupsen/logrus"
 )
 
 type FINHandler struct {
@@ -18,6 +17,10 @@ func NewFINHandler(peerManager PeerManager, ipDistributor IpDistributor) *FINHan
 }
 
 func (h *FINHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
+	l := log(packet)
+
+	l.Debug("Handle packet")
+
 	peer, err := h.peerManager.GetByAddr(ctx, packet.Addr())
 	if err != nil {
 		return errors.Wrap(err, "peerManager.GetByAddr")
@@ -27,11 +30,14 @@ func (h *FINHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 		return errors.Wrap(err, "peerManager.Remove")
 	}
 
-	logrus.Infof("Removed peer: addr=[%s], dedicated ip=[%s]", peer.Addr(), peer.DedicatedIP())
-
 	if err = h.ipDistributor.ReleaseIP(peer.DedicatedIP()); err != nil {
 		return errors.Wrap(err, "ipDistributor.ReleaseIP")
 	}
+
+	l.
+		WithField("PeerAddr", peer.Addr()).
+		WithField("DedicatedIP", peer.DedicatedIP()).
+		Info("Removed peer and release dedicated ip")
 
 	return nil
 }

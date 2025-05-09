@@ -10,7 +10,7 @@
     "tunnelChanSize": 1000,
     "network": "udp",
     "ip": "",
-    "port": 5000,
+    "port": 0,
     "serverIP": "192.168.0.30",
     "serverPort": 6000,
     "serverConnectionTimeout": "3s"

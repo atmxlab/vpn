@@ -54,6 +54,8 @@ func NewClient(
 }
 
 func (c *Client) Run(ctx context.Context, connTimeout time.Duration) (err error) {
+	l := logrus.WithField("Namespace", "CLIENT")
+
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
@@ -64,38 +66,45 @@ func (c *Client) Run(ctx context.Context, connTimeout time.Duration) (err error)
 	defer func() {
 		if err != nil {
 			cancel()
-			logrus.Warnf("Client app error: %v", err)
+			l.
+				WithError(err).
+				Error("Client app error")
 		}
 
-		logrus.Info("Waiting app closing...")
+		l.Info("Waiting app closing...")
 		if egErr := c.eg.Wait(); egErr != nil {
 			err = errors.Join(err, errors.Wrap(egErr, "error group wait"))
+			l.
+				WithError(egErr).
+				Error("Client app error after wait")
 		}
 	}()
 
 	c.eg.Go(func() error {
-		logrus.Debug("Starting router")
-		defer logrus.Warn("Stopped router")
+		defer l.Warn("Stopped router")
+
+		l.Info("Starting router...")
 		if err = c.router.Run(ctx); err != nil {
 			return errors.Wrap(err, "failed to start router")
 		}
 		return nil
 	})
 
-	logrus.Info("Init connection")
+	l.Info("Init connection")
 	if err = c.synAction.Run(ctx); err != nil {
 		return errors.Wrap(err, "failed to start syn action")
 	}
 
-	logrus.Info("Waiting connection signal...")
+	l.Info("Waiting connection signal...")
 	if err = c.connSignal.WaitWithTimeout(connTimeout); err != nil {
 		return errors.Wrap(err, "failed to wait for connection signal")
 	}
-	logrus.Info("Connected to server!")
+	l.Info("Connected to server!")
 
 	c.eg.Go(func() error {
-		logrus.Debug("Starting KPA action")
-		defer logrus.Warn("stopped KPA action")
+		defer l.Warn("Stopped KPA action")
+
+		l.Info("Starting KPA action...")
 		if err = c.kpaAction.Run(ctx); err != nil {
 			return errors.Wrap(err, "failed to start kpa action")
 		}

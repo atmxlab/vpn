@@ -33,7 +33,11 @@ func (t *Tun) Write(buf []byte) (int, error) {
 		return n, errors.Wrap(err, "tun.Write")
 	}
 
-	logrus.Debugf("Write to TUN: len: [%d]", n)
+	logrus.
+		WithField("Namespace", "TUN").
+		WithField("Len", n).
+		Debug("Write")
+
 	return n, nil
 }
 

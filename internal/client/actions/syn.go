@@ -17,6 +17,10 @@ func NewSYNAction(tunnel Tunnel, serverAddr net.Addr) *SYNAction {
 }
 
 func (a *SYNAction) Run(_ context.Context) error {
+	l := log("SYN")
+
+	l.Debug("Run action")
+
 	_, err := a.tunnel.SYN(a.serverAddr, nil)
 	if err != nil {
 		return errors.Wrap(err, "tunnel.SYN")

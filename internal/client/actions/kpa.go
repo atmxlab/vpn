@@ -19,6 +19,10 @@ func NewKPAAction(tunnel Tunnel, serverAddr net.Addr, tick time.Duration) *KPAAc
 }
 
 func (a *KPAAction) Run(ctx context.Context) error {
+	l := log("KPA")
+
+	l.Debug("Run action")
+
 	ticker := time.NewTicker(a.tick)
 	defer ticker.Stop()
 
