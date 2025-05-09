@@ -7,22 +7,22 @@ import (
 	"github.com/atmxlab/vpn/pkg/errors"
 )
 
-//go:generate mock Stopper
-type Stopper interface {
-	Stop(ctx context.Context) error
+//go:generate mock Closer
+type Closer interface {
+	Close(ctx context.Context) error
 }
 
 type FINHandler struct {
-	stopper Stopper
+	closer Closer
 }
 
-func NewFINHandler(stopper Stopper) *FINHandler {
-	return &FINHandler{stopper: stopper}
+func NewFINHandler(closer Closer) *FINHandler {
+	return &FINHandler{closer: closer}
 }
 
 func (h *FINHandler) Handle(ctx context.Context, _ *protocol.TunnelPacket) error {
-	if err := h.stopper.Stop(ctx); err != nil {
-		return errors.Wrap(err, "failed to stop client connection")
+	if err := h.closer.Close(ctx); err != nil {
+		return errors.Wrap(err, "failed to close client connection")
 	}
 
 	return nil

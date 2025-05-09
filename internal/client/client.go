@@ -5,27 +5,34 @@ import (
 	"time"
 
 	"github.com/atmxlab/vpn/pkg/errors"
-	"github.com/atmxlab/vpn/pkg/signal"
 	"golang.org/x/sync/errgroup"
 )
 
+//go:generate mock Router
 type Router interface {
 	Run(ctx context.Context) error
 }
 
+//go:generate mock KPAAction
 type KPAAction interface {
 	Run(ctx context.Context) error
 }
 
+//go:generate mock SynAction
 type SynAction interface {
 	Run(ctx context.Context) error
+}
+
+//go:generate mock Signaller
+type Signaller interface {
+	WaitWithTimeout(ctx context.Context, timeout time.Duration) error
 }
 
 type Client struct {
 	router     Router
 	synAction  SynAction
 	kpaAction  KPAAction
-	connSignal *signal.Signal
+	connSignal Signaller
 
 	cancel context.CancelFunc
 	eg     *errgroup.Group
@@ -35,7 +42,7 @@ func NewClient(
 	router Router,
 	synAction SynAction,
 	kpaAction KPAAction,
-	connSignal *signal.Signal,
+	connSignal Signaller,
 ) *Client {
 	return &Client{
 		router:     router,
@@ -54,8 +61,8 @@ func (c *Client) Run(ctx context.Context, connTimeout time.Duration) (err error)
 	c.eg, ctx = errgroup.WithContext(ctx)
 
 	defer func() {
-		if err = c.eg.Wait(); err != nil {
-			err = errors.Wrap(err, "error group wait")
+		if egErr := c.eg.Wait(); egErr != nil {
+			err = errors.Join(err, errors.Wrap(egErr, "error group wait"))
 		}
 	}()
 	defer cancel()

@@ -20,11 +20,11 @@ func TestFINHandler(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		stopper := mocks.NewMockStopper(ctrl)
+		closer := mocks.NewMockCloser(ctrl)
 
-		stopper.EXPECT().Stop(gomock.Any()).Return(nil)
+		closer.EXPECT().Close(gomock.Any()).Return(nil)
 
-		h := tunnel.NewFINHandler(stopper)
+		h := tunnel.NewFINHandler(closer)
 
 		err := h.Handle(context.Background(), nil)
 		require.NoError(t, err)
@@ -36,12 +36,12 @@ func TestFINHandler(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
-		stopper := mocks.NewMockStopper(ctrl)
+		closer := mocks.NewMockCloser(ctrl)
 
 		stopErr := errors.New("stopper error")
-		stopper.EXPECT().Stop(gomock.Any()).Return(stopErr)
+		closer.EXPECT().Close(gomock.Any()).Return(stopErr)
 
-		h := tunnel.NewFINHandler(stopper)
+		h := tunnel.NewFINHandler(closer)
 
 		err := h.Handle(context.Background(), nil)
 		require.ErrorIs(t, err, stopErr)

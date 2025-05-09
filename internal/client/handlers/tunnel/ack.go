@@ -18,14 +18,30 @@ type NetConfigurator interface {
 	ConfigureRouting(ctx context.Context, subnet net.IPNet) error
 }
 
-type ACKHandler struct {
-	tunConfigurator TunConfigurator
-	netConfigurator NetConfigurator
-	ipMasc          net.IPMask
+//go:generate mock Signaller
+type Signaller interface {
+	Signal(ctx context.Context) error
 }
 
-func NewACKHandler(tunConfigurator TunConfigurator, netConfigurator NetConfigurator, ipMasc net.IPMask) *ACKHandler {
-	return &ACKHandler{tunConfigurator: tunConfigurator, netConfigurator: netConfigurator, ipMasc: ipMasc}
+type ACKHandler struct {
+	tunConfigurator  TunConfigurator
+	netConfigurator  NetConfigurator
+	connectSignaller Signaller
+	ipMasc           net.IPMask
+}
+
+func NewACKHandler(
+	tunConfigurator TunConfigurator,
+	netConfigurator NetConfigurator,
+	ipMasc net.IPMask,
+	connectSignaller Signaller,
+) *ACKHandler {
+	return &ACKHandler{
+		tunConfigurator:  tunConfigurator,
+		netConfigurator:  netConfigurator,
+		ipMasc:           ipMasc,
+		connectSignaller: connectSignaller,
+	}
 }
 
 func (h *ACKHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
@@ -45,6 +61,10 @@ func (h *ACKHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 
 	if err = h.netConfigurator.ConfigureRouting(ctx, subnet); err != nil {
 		return errors.Wrap(err, "failed to configure routing")
+	}
+
+	if err = h.connectSignaller.Signal(ctx); err != nil {
+		return errors.Wrap(err, "failed to signal connect")
 	}
 
 	return nil
