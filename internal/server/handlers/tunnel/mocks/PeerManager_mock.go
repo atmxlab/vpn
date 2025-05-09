@@ -61,36 +61,33 @@ func (mr *MockPeerManagerMockRecorder) Add(arg0, arg1, arg2 any, arg3 ...any) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Add", reflect.TypeOf((*MockPeerManager)(nil).Add), varargs...)
 }
 
+// Extend mocks base method.
+func (m *MockPeerManager) Extend(arg0 context.Context, arg1 *server.Peer, arg2 time.Duration) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Extend", arg0, arg1, arg2)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Extend indicates an expected call of Extend.
+func (mr *MockPeerManagerMockRecorder) Extend(arg0, arg1, arg2 any) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Extend", reflect.TypeOf((*MockPeerManager)(nil).Extend), arg0, arg1, arg2)
+}
+
 // GetByAddr mocks base method.
-func (m *MockPeerManager) GetByAddr(arg0 context.Context, arg1 net.Addr) (*server.Peer, bool, error) {
+func (m *MockPeerManager) GetByAddr(arg0 context.Context, arg1 net.Addr) (*server.Peer, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetByAddr", arg0, arg1)
 	ret0, _ := ret[0].(*server.Peer)
-	ret1, _ := ret[1].(bool)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // GetByAddr indicates an expected call of GetByAddr.
 func (mr *MockPeerManagerMockRecorder) GetByAddr(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByAddr", reflect.TypeOf((*MockPeerManager)(nil).GetByAddr), arg0, arg1)
-}
-
-// GetByAddrAndExtend mocks base method.
-func (m *MockPeerManager) Extend(arg0 context.Context, arg1 net.Addr, arg2 time.Duration) (*server.Peer, bool, error) {
-	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Extend", arg0, arg1, arg2)
-	ret0, _ := ret[0].(*server.Peer)
-	ret1, _ := ret[1].(bool)
-	ret2, _ := ret[2].(error)
-	return ret0, ret1, ret2
-}
-
-// GetByAddrAndExtend indicates an expected call of GetByAddrAndExtend.
-func (mr *MockPeerManagerMockRecorder) GetByAddrAndExtend(arg0, arg1, arg2 any) *gomock.Call {
-	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Extend", reflect.TypeOf((*MockPeerManager)(nil).Extend), arg0, arg1, arg2)
 }
 
 // HasPeer mocks base method.

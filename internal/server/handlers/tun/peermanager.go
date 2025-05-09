@@ -11,5 +11,5 @@ import (
 //
 //go:generate mock PeerManager
 type PeerManager interface {
-	GetByDedicatedIP(ctx context.Context, ip net.IP) (peer *server.Peer, exists bool, err error)
+	GetByDedicatedIP(ctx context.Context, ip net.IP) (*server.Peer, error)
 }

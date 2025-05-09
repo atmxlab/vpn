@@ -25,10 +25,8 @@ func TestManager(t *testing.T) {
 
 		require.NoError(t, pm.Add(ctx, peer, gen.RandDuration()))
 
-		actualPeer, exists, err := pm.GetByAddr(ctx, peer.Addr())
+		actualPeer, err := pm.GetByAddr(ctx, peer.Addr())
 		require.NoError(t, err)
-		require.True(t, exists)
-
 		require.Equal(t, peer, actualPeer)
 	})
 
@@ -43,10 +41,8 @@ func TestManager(t *testing.T) {
 
 		require.NoError(t, pm.Add(ctx, peer, ttl))
 
-		actualPeer, exists, err := pm.GetByDedicatedIP(ctx, peer.DedicatedIP())
+		actualPeer, err := pm.GetByDedicatedIP(ctx, peer.DedicatedIP())
 		require.NoError(t, err)
-		require.True(t, exists)
-
 		require.Equal(t, peer, actualPeer)
 	})
 
@@ -77,9 +73,8 @@ func TestManager(t *testing.T) {
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 
-		actualPeer, exists, err := pm.GetByAddr(ctx, peer.Addr())
+		actualPeer, err := pm.GetByAddr(ctx, peer.Addr())
 		require.NoError(t, err)
-		require.True(t, exists)
 		require.Equal(t, peer, actualPeer)
 	})
 
@@ -98,9 +93,8 @@ func TestManager(t *testing.T) {
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 
-		actualPeer, exists, err := pm.GetByDedicatedIP(ctx, peer.DedicatedIP())
+		actualPeer, err := pm.GetByDedicatedIP(ctx, peer.DedicatedIP())
 		require.NoError(t, err)
-		require.True(t, exists)
 		require.Equal(t, peer, actualPeer)
 	})
 
@@ -119,10 +113,8 @@ func TestManager(t *testing.T) {
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 
-		actualPeer, exists, err := pm.Extend(ctx, peer.Addr(), ttl)
+		err := pm.Extend(ctx, peer, ttl)
 		require.NoError(t, err)
-		require.True(t, exists)
-		require.Equal(t, peer, actualPeer)
 	})
 
 	t.Run("has without peer needs peer", func(t *testing.T) {

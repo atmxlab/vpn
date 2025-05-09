@@ -66,9 +66,9 @@ func TestHandle(t *testing.T) {
 		peerManager.
 			EXPECT().
 			GetByDedicatedIP(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, dIP net.IP) (*server.Peer, bool, error) {
+			DoAndReturn(func(ctx context.Context, dIP net.IP) (*server.Peer, error) {
 				require.True(t, dedicatedIP.Equal(dIP))
-				return nil, false, peerManagerError
+				return nil, peerManagerError
 			})
 
 		tunl := mocks.NewMockTunnel(ctrl)
@@ -95,9 +95,9 @@ func TestHandle(t *testing.T) {
 		peerManager.
 			EXPECT().
 			GetByDedicatedIP(gomock.Any(), gomock.Any()).
-			DoAndReturn(func(ctx context.Context, dIP net.IP) (*server.Peer, bool, error) {
+			DoAndReturn(func(ctx context.Context, dIP net.IP) (*server.Peer, error) {
 				require.True(t, dedicatedIP.Equal(dIP))
-				return nil, false, nil
+				return nil, errors.ErrNotFound
 			})
 
 		tunl := mocks.NewMockTunnel(ctrl)

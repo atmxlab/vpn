@@ -65,14 +65,11 @@ func (pm *Manager) Add(
 	return nil
 }
 
-func (pm *Manager) Remove(ctx context.Context, peer *server.Peer) error {
+func (pm *Manager) Remove(_ context.Context, peer *server.Peer) error {
 	pm.mu.Lock()
 	defer pm.mu.Unlock()
 
-	p, ok, err := pm.getByAddrLocked(peer.Addr())
-	if err != nil {
-		return errors.Wrap(err, "get peer by addr locked")
-	}
+	p, ok := pm.getByAddrLocked(peer.Addr())
 	if !ok {
 		return nil
 	}
@@ -85,56 +82,52 @@ func (pm *Manager) Remove(ctx context.Context, peer *server.Peer) error {
 	return nil
 }
 
-func (pm *Manager) GetByDedicatedIP(_ context.Context, ip net.IP) (*server.Peer, bool, error) {
+func (pm *Manager) GetByDedicatedIP(_ context.Context, ip net.IP) (*server.Peer, error) {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
 
 	if p, ok := pm.indexByDedicatedIP[ip.String()]; ok {
-		return p.peer, true, nil
+		return p.peer, nil
 	}
 
-	return nil, false, nil
+	return nil, errors.NotFoundf("peer by dedicated ip not found: ip=%s", ip)
 }
 
-func (pm *Manager) GetByAddr(_ context.Context, addr net.Addr) (*server.Peer, bool, error) {
+func (pm *Manager) GetByAddr(_ context.Context, addr net.Addr) (*server.Peer, error) {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
 
-	if p, ok, err := pm.getByAddrLocked(addr); ok {
-		return p.peer, ok, err
+	if p, ok := pm.getByAddrLocked(addr); ok {
+		return p.peer, nil
 	}
 
-	return nil, false, nil
+	return nil, errors.NotFoundf("peer by address not found: addr=%s", addr)
 }
 
-func (pm *Manager) Extend(_ context.Context, addr net.Addr, _ time.Duration) (
-	*server.Peer,
-	bool,
-	error,
-) {
+func (pm *Manager) Extend(_ context.Context, peer *server.Peer, _ time.Duration) error {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
 
-	if p, ok, err := pm.getByAddrLocked(addr); ok {
+	if p, ok := pm.getByAddrLocked(peer.Addr()); ok {
 		p.extendChan <- struct{}{}
-		return p.peer, ok, err
+		return nil
 	}
 
-	return nil, false, nil
+	return errors.NotFoundf("peer by address not found: addr=%s", peer.Addr())
 }
 
 func (pm *Manager) HasPeer(_ context.Context, addr net.Addr) (bool, error) {
 	pm.mu.RLock()
 	defer pm.mu.RUnlock()
 
-	_, ok, err := pm.getByAddrLocked(addr)
+	_, ok := pm.getByAddrLocked(addr)
 
-	return ok, err
+	return ok, nil
 }
 
-func (pm *Manager) getByAddrLocked(addr net.Addr) (*peer, bool, error) {
+func (pm *Manager) getByAddrLocked(addr net.Addr) (*peer, bool) {
 	p, ok := pm.indexByAddress[addr.String()]
-	return p, ok, nil
+	return p, ok
 }
 
 func (pm *Manager) monitorPeer(ctx context.Context, p *peer) error {

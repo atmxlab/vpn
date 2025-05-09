@@ -23,7 +23,7 @@ func (h *Handler) Handle(
 	packet *protocol.TunPacket,
 ) error {
 	ip.LogHeader(packet.Payload())
-	
+
 	header, err := ipv4.ParseHeader(packet.Payload())
 	if err != nil {
 		return errors.Wrap(err, "ipv4.ParseHeader")
@@ -34,7 +34,7 @@ func (h *Handler) Handle(
 		return errors.Wrap(err, "peerManager.GetByDedicatedIP")
 	}
 	if !exists {
-		return errors.NotFound("peer by dedicated ip not found: ip=[%s]", header.Dst)
+		return errors.NotFoundf("peer by dedicated ip not found: ip=[%s]", header.Dst)
 	}
 
 	_, err = h.tunnel.PSH(peer.Addr(), packet.Payload())

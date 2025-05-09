@@ -77,8 +77,6 @@ func New(
 		Config(func(b *router.ConfigBuilder) {
 			b.
 				BufferSize(cfg.serverConfig.BufferSize).
-				TunMtu(cfg.serverConfig.Tun.MTU).
-				TunSubnet(tunSubnet).
 				TunChanSize(cfg.serverConfig.Tun.TunChanSize).
 				TunnelChanSize(cfg.serverConfig.Tunnel.TunnelChanSize)
 		}).

@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/atmxlab/vpn/internal/server"
 	"github.com/atmxlab/vpn/internal/server/handlers/tunnel"
 	"github.com/atmxlab/vpn/internal/server/handlers/tunnel/mocks"
 	"github.com/atmxlab/vpn/pkg/errors"
@@ -21,6 +22,7 @@ func TestKPAHandler(t *testing.T) {
 
 		kpaTTL := 1 * time.Minute
 		tp := gen.RandTunnelPacket()
+		peer := server.NewPeer(gen.RandIP(), tp.Addr())
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -28,8 +30,12 @@ func TestKPAHandler(t *testing.T) {
 		pm := mocks.NewMockPeerManager(ctrl)
 
 		pm.EXPECT().
-			GetByAddrAndExtend(gomock.Any(), tp.Addr(), kpaTTL).
-			Return(nil, true, nil)
+			GetByAddr(gomock.Any(), tp.Addr()).
+			Return(peer, nil)
+
+		pm.EXPECT().
+			Extend(gomock.Any(), peer, kpaTTL).
+			Return(nil)
 
 		h := tunnel.NewKPAHandler(pm, kpaTTL)
 
@@ -49,8 +55,8 @@ func TestKPAHandler(t *testing.T) {
 		pm := mocks.NewMockPeerManager(ctrl)
 
 		pm.EXPECT().
-			GetByAddrAndExtend(gomock.Any(), tp.Addr(), kpaTTL).
-			Return(nil, false, nil)
+			GetByAddr(gomock.Any(), tp.Addr()).
+			Return(nil, errors.ErrNotFound)
 
 		h := tunnel.NewKPAHandler(pm, kpaTTL)
 
@@ -58,21 +64,27 @@ func TestKPAHandler(t *testing.T) {
 		require.ErrorIs(t, err, errors.ErrNotFound)
 	})
 
-	t.Run("peer manager error", func(t *testing.T) {
+	t.Run("extend error", func(t *testing.T) {
 		t.Parallel()
 
 		kpaTTL := 1 * time.Minute
 		tp := gen.RandTunnelPacket()
+		peer := server.NewPeer(gen.RandIP(), tp.Addr())
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		pm := mocks.NewMockPeerManager(ctrl)
 
-		pmErr := errors.New("peer manager error")
 		pm.EXPECT().
-			GetByAddrAndExtend(gomock.Any(), tp.Addr(), kpaTTL).
-			Return(nil, false, pmErr)
+			GetByAddr(gomock.Any(), tp.Addr()).
+			Return(peer, nil)
+
+		pmErr := errors.New("peer manager error")
+
+		pm.EXPECT().
+			Extend(gomock.Any(), peer, kpaTTL).
+			Return(pmErr)
 
 		h := tunnel.NewKPAHandler(pm, kpaTTL)
 

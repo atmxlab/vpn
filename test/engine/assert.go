@@ -4,6 +4,7 @@ import (
 	"net"
 
 	"github.com/atmxlab/vpn/internal/protocol"
+	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/atmxlab/vpn/test"
 	"github.com/stretchr/testify/require"
 )
@@ -20,17 +21,15 @@ func CHECKPOINT(actions ...test.Action) test.Action {
 
 func ExpectPeer(addr net.Addr) test.Action {
 	return newSimpleAction(func(a test.App) {
-		_, exists, err := a.PeerManager().GetByAddr(a.Ctx(), addr)
+		_, err := a.PeerManager().GetByAddr(a.Ctx(), addr)
 		require.NoError(a.T(), err)
-		require.Truef(a.T(), exists, "peer with addr=[%v] must be exists", addr.String())
 	})
 }
 
 func UnexpectPeer(addr net.Addr) test.Action {
 	return newSimpleAction(func(a test.App) {
-		_, exists, err := a.PeerManager().GetByAddr(a.Ctx(), addr)
-		require.NoError(a.T(), err)
-		require.Falsef(a.T(), exists, "peer with addr=[%v] cannot be exists", addr.String())
+		_, err := a.PeerManager().GetByAddr(a.Ctx(), addr)
+		require.ErrorIs(a.T(), err, errors.ErrNotFound)
 	})
 }
 

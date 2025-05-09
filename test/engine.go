@@ -37,7 +37,7 @@ type Tun interface {
 }
 
 type PeerManager interface {
-	GetByAddr(ctx context.Context, addr net.Addr) (peer *server.Peer, exists bool, err error)
+	GetByAddr(ctx context.Context, addr net.Addr) (*server.Peer, error)
 }
 
 type IPDistributor interface {

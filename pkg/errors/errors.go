@@ -8,8 +8,12 @@ var (
 	ErrAlreadyExists   = errors.New("already exists")
 )
 
-func NotFound(msg string, a ...any) error {
+func NotFoundf(msg string, a ...any) error {
 	return Wrapf(ErrNotFound, msg, a)
+}
+
+func NotFound(msg string) error {
+	return Wrap(ErrNotFound, msg)
 }
 
 func InvalidArgument(msg string, a ...any) error {

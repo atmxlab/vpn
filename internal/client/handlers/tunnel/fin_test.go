@@ -25,7 +25,7 @@ func TestFINHandler(t *testing.T) {
 		defer ctrl.Finish()
 
 		pm := mocks.NewMockPeerManager(ctrl)
-		pm.EXPECT().GetByAddr(gomock.Any(), tp.Addr()).Return(peer, true, nil)
+		pm.EXPECT().GetByAddr(gomock.Any(), tp.Addr()).Return(peer, nil)
 		pm.EXPECT().Remove(gomock.Any(), peer).Return(nil)
 
 		ipd := mocks.NewMockIpDistributor(ctrl)
@@ -46,7 +46,7 @@ func TestFINHandler(t *testing.T) {
 		defer ctrl.Finish()
 
 		pm := mocks.NewMockPeerManager(ctrl)
-		pm.EXPECT().GetByAddr(gomock.Any(), tp.Addr()).Return(nil, false, nil)
+		pm.EXPECT().GetByAddr(gomock.Any(), tp.Addr()).Return(nil, errors.ErrNotFound)
 
 		ipd := mocks.NewMockIpDistributor(ctrl)
 
