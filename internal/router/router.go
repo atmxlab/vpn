@@ -7,7 +7,6 @@ import (
 
 	"github.com/atmxlab/vpn/internal/protocol"
 	"github.com/atmxlab/vpn/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -110,14 +109,16 @@ func (r *Router) Run(ctx context.Context) error {
 	return nil
 }
 
-func (r *Router) Stop() {
+func (r *Router) Close() error {
 	if r.cancel == nil {
-		return
+		return nil
 	}
 
 	r.cancel()
 
 	if err := r.eg.Wait(); err != nil {
-		logrus.Errorf("error group wait: %v", err)
+		return errors.Wrap(err, "error group wait")
 	}
+
+	return nil
 }

@@ -1,6 +1,9 @@
 package signal
 
-import "context"
+import (
+	"context"
+	"time"
+)
 
 type Signal struct {
 	signal chan struct{}
@@ -14,6 +17,18 @@ func NewSignal() *Signal {
 
 func (s *Signal) Wait() {
 	<-s.signal
+}
+
+func (s *Signal) WaitWithTimeout(ctx context.Context, timeout time.Duration) error {
+	ctx, cancel := context.WithTimeout(ctx, timeout)
+	defer cancel()
+
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-s.signal:
+		return nil
+	}
 }
 
 func (s *Signal) Close() {
