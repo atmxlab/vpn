@@ -18,12 +18,9 @@ func NewFINHandler(peerManager PeerManager, ipDistributor IpDistributor) *FINHan
 }
 
 func (h *FINHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
-	peer, exists, err := h.peerManager.GetByAddr(ctx, packet.Addr())
+	peer, err := h.peerManager.GetByAddr(ctx, packet.Addr())
 	if err != nil {
 		return errors.Wrap(err, "peerManager.GetByAddr")
-	}
-	if !exists {
-		return errors.NotFound("peer not found")
 	}
 
 	if err = h.peerManager.Remove(ctx, peer); err != nil {

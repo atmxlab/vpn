@@ -119,7 +119,7 @@ func TestManager(t *testing.T) {
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 		require.NoError(t, pm.Add(ctx, gen.RandPeer(), gen.RandDuration()))
 
-		actualPeer, exists, err := pm.GetByAddrAndExtend(ctx, peer.Addr(), ttl)
+		actualPeer, exists, err := pm.Extend(ctx, peer.Addr(), ttl)
 		require.NoError(t, err)
 		require.True(t, exists)
 		require.Equal(t, peer, actualPeer)

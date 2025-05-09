@@ -10,26 +10,23 @@ import (
 )
 
 type KPAHandler struct {
-	peerManager  PeerManager
-	keepAliveTTL time.Duration
+	peerManager   PeerManager
+	ipDistributor IpDistributor
+	keepAliveTTL  time.Duration
 }
 
 func NewKPAHandler(peerManager PeerManager, keepAliveTTL time.Duration) *KPAHandler {
 	return &KPAHandler{peerManager: peerManager, keepAliveTTL: keepAliveTTL}
 }
 
-// TODO: нужно сделать так чтобы выделенный IP тоже освобождался
-//  в таком случае можно тоже там сделать такую же логику с тикером,
-//  как и задумывалось для менеджера пиров.
-//  Тут по итогу просто нужно будет продлять аренду выделенного адреса.
-
 func (h *KPAHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) error {
-	_, exists, err := h.peerManager.GetByAddrAndExtend(ctx, packet.Addr(), h.keepAliveTTL)
+	peer, err := h.peerManager.GetByAddr(ctx, packet.Addr())
 	if err != nil {
-		return errors.Wrap(err, "get peer by addr")
+		return errors.Wrap(err, "peerManager.GetByAddr")
 	}
-	if !exists {
-		return errors.NotFound("peer not found")
+
+	if err = h.peerManager.Extend(ctx, peer, h.keepAliveTTL); err != nil {
+		return errors.Wrap(err, "peerManager.Extend")
 	}
 
 	logrus.Debugf("Keep alive: peer addr=[%s]", packet.Addr())

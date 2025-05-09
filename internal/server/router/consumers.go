@@ -21,12 +21,12 @@ func (r *Router) consumeTunnel(ctx context.Context) error {
 		logrus.Debugf("Readed from tunnel channel: flag=[%s]", packet.Header().Flag())
 		handler, ok := r.tunnelHandlerByFlag[packet.Header().Flag()]
 		if !ok {
-			logrus.Errorf("failed to find handler by flag=[%s]", packet.Header().Flag())
+			logrus.Errorf("Failed to find handler by flag=[%s]", packet.Header().Flag())
 			continue
 		}
 
 		if err := handler.Handle(ctx, packet); err != nil {
-			logrus.Errorf("failed to handle TUNNEL packet %+v: %v", packet, err)
+			logrus.Errorf("Failed to handle TUNNEL packet %+v: %v", packet, err)
 		}
 	}
 

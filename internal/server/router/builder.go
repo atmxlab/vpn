@@ -1,8 +1,6 @@
 package router
 
 import (
-	"net"
-
 	"github.com/atmxlab/vpn/internal/protocol"
 )
 
@@ -67,8 +65,6 @@ func (b *Builder) Build() *Router {
 
 type ConfigBuilder struct {
 	bufferSize     uint16
-	subnet         net.IPNet
-	mtu            uint16
 	tunnelChanSize uint
 	tunChanSize    uint
 }
@@ -79,16 +75,6 @@ func newConfigBuilder() *ConfigBuilder {
 
 func (c *ConfigBuilder) BufferSize(bufferSize uint16) *ConfigBuilder {
 	c.bufferSize = bufferSize
-	return c
-}
-
-func (c *ConfigBuilder) TunSubnet(subnet net.IPNet) *ConfigBuilder {
-	c.subnet = subnet
-	return c
-}
-
-func (c *ConfigBuilder) TunMtu(mtu uint16) *ConfigBuilder {
-	c.mtu = mtu
 	return c
 }
 
@@ -104,14 +90,7 @@ func (c *ConfigBuilder) TunChanSize(tunChanSize uint) *ConfigBuilder {
 
 func (c *ConfigBuilder) build() *config {
 	return &config{
-		bufferSize: c.bufferSize,
-		tun: struct {
-			subnet net.IPNet
-			mtu    uint16
-		}{
-			subnet: c.subnet,
-			mtu:    c.mtu,
-		},
+		bufferSize:     c.bufferSize,
 		tunnelChanSize: c.tunnelChanSize,
 		tunChanSize:    c.tunChanSize,
 	}

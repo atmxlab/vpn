@@ -107,7 +107,7 @@ func (pm *Manager) GetByAddr(_ context.Context, addr net.Addr) (*server.Peer, bo
 	return nil, false, nil
 }
 
-func (pm *Manager) GetByAddrAndExtend(_ context.Context, addr net.Addr, _ time.Duration) (
+func (pm *Manager) Extend(_ context.Context, addr net.Addr, _ time.Duration) (
 	*server.Peer,
 	bool,
 	error,
