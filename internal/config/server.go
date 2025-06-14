@@ -28,10 +28,10 @@ type ServerTun struct {
 	TunChanSize uint `json:"tunChanSize,omitempty"`
 }
 
-func (st ServerTun) CIDR() (net.IP, net.IPNet, error) {
+func (st ServerTun) GetCIDR() (net.IP, net.IPNet, error) {
 	tunIP, subnet, err := net.ParseCIDR(st.SubnetCIDR)
 	if err != nil {
-		return net.IP{}, net.IPNet{}, errors.Wrap(err, "parsing subnet CIDR")
+		return net.IP{}, net.IPNet{}, errors.Wrap(err, "parsing subnet GetCIDR")
 	}
 
 	return tunIP, *subnet, nil

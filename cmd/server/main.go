@@ -28,8 +28,8 @@ func main() {
 	cfg, err := jsonconfig.Load[config.ServerConfig](configPath)
 	cmd.Exitf(err, "jsonconfig.Load")
 
-	tunIP, tunSubnet, err := cfg.Tun.CIDR()
-	cmd.Exitf(err, "cfg.Tun.CIDR")
+	tunIP, tunSubnet, err := cfg.Tun.GetCIDR()
+	cmd.Exitf(err, "cfg.Tun.GetCIDR")
 
 	embeddedTun, err := setupTun(tunIP, tunSubnet, cfg.Tun.MTU)
 	cmd.Exitf(err, "setupTun")

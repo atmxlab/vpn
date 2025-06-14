@@ -43,6 +43,9 @@ func main() {
 	embeddedTun, err := setupTun(cfg.Tun.MTU)
 	cmd.Exitf(err, "setupTun")
 
+	err = setupOS(cfg.Tunnel.GetServerIP(), cfg.GetGatewayIP())
+	cmd.Exitf(err, "setupOS")
+
 	tn := tun.NewTun(embeddedTun)
 	tunl := tunnel.New(setupTunnelConn(cfg))
 

@@ -1,13 +1,20 @@
 package config
 
+import "net"
+
 type ClientConfig struct {
 	// Кол-во байт, которые будут читаться из tun интерфейса и туннеля
 	BufferSize uint16 `json:"bufferSize,omitempty"`
 	// Время жизни пира до следующего keepalive запроса
 	KeepAliveTickDuration Duration `json:"keepAliveTickDuration,omitempty"`
+	// Шлюз для выхода в интернет (e.g. Адрес роутера)
+	GatewayIP string       `json:"gatewayIP,omitempty"`
+	Tun       ClientTun    `json:"tun"`
+	Tunnel    ClientTunnel `json:"tunnel"`
+}
 
-	Tun    ClientTun    `json:"tun"`
-	Tunnel ClientTunnel `json:"tunnel"`
+func (cc ClientConfig) GetGatewayIP() net.IP {
+	return net.ParseIP(cc.GatewayIP)
 }
 
 type ClientTun struct {
@@ -36,4 +43,8 @@ type ClientTunnel struct {
 	ServerPort uint16 `json:"serverPort,omitempty"`
 	// Timeout соединения к серверу
 	ServerConnectionTimeout Duration `json:"serverConnectionTimeout,omitempty"`
+}
+
+func (ct ClientTunnel) GetServerIP() net.IP {
+	return net.ParseIP(ct.ServerIP)
 }
