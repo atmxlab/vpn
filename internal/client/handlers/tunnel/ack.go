@@ -10,7 +10,7 @@ import (
 
 //go:generate mock TunConfigurator
 type TunConfigurator interface {
-	ChangeAddr(ctx context.Context, subnet net.IPNet) error
+	ChangeTunAddr(ctx context.Context, subnet net.IPNet) error
 }
 
 //go:generate mock NetConfigurator
@@ -63,7 +63,7 @@ func (h *ACKHandler) Handle(ctx context.Context, packet *protocol.TunnelPacket) 
 		Mask: h.ipMasc,
 	}
 
-	if err = h.tunConfigurator.ChangeAddr(ctx, subnet); err != nil {
+	if err = h.tunConfigurator.ChangeTunAddr(ctx, subnet); err != nil {
 		return errors.Wrap(err, "failed to change tun subnet")
 	}
 

@@ -21,19 +21,20 @@ type ServerTun struct {
 	// Из этой подсети будут выдаваться IP адреса клиентам
 	SubnetCIDR string `json:"subnetCIDR,omitempty"`
 	// Maximum Transition Unit  - максимальная длина неделимого пакета
+	// MTU = 1500 - 20 (IP) - 8 (UDP) - 1 (VPN) = 1471
 	MTU uint16 `json:"mtu,omitempty"`
 	// Размер буфера канала,
 	// в который будут складываться пакеты из TUN интерфейса
 	TunChanSize uint `json:"tunChanSize,omitempty"`
 }
 
-func (st ServerTun) Subnet() (net.IPNet, error) {
-	_, subnet, err := net.ParseCIDR(st.SubnetCIDR)
+func (st ServerTun) CIDR() (net.IP, net.IPNet, error) {
+	tunIP, subnet, err := net.ParseCIDR(st.SubnetCIDR)
 	if err != nil {
-		return net.IPNet{}, errors.Wrap(err, "parsing subnet CIDR")
+		return net.IP{}, net.IPNet{}, errors.Wrap(err, "parsing subnet CIDR")
 	}
 
-	return *subnet, nil
+	return tunIP, *subnet, nil
 }
 
 type ServerTunnel struct {

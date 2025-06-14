@@ -3,7 +3,7 @@
   "keepAliveTickDuration": "5s",
   "tun": {
     "ipMask": "255.255.255.0",
-    "mtu": 1500,
+    "mtu": 1471,
     "tunChanSize": 1000
   },
   "tunnel": {

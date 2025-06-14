@@ -5,13 +5,14 @@ import (
 	"net"
 	"strconv"
 
+	"github.com/atmxlab/vpn/internal/pkg/ip"
 	"github.com/atmxlab/vpn/pkg/command"
 	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/sirupsen/logrus"
 	"github.com/songgao/water"
 )
 
-func setupTun(subnet net.IPNet, mtu uint16) (*water.Interface, error) {
+func setupTun(tunIP net.IP, tunSubnet net.IPNet, mtu uint16) (*water.Interface, error) {
 	cfg := water.Config{
 		DeviceType: water.TUN,
 	}
@@ -26,30 +27,29 @@ func setupTun(subnet net.IPNet, mtu uint16) (*water.Interface, error) {
 
 	commandBuilder := command.NewCommandsBuilder()
 
+	tunCIDR := ip.BuildCIDR(tunIP, tunSubnet.Mask)
+
 	commandBuilder.
 		Stdout(stdout).
 		Stderr(stderr).
 		Add(func(b *command.Builder) {
-			b.Before(func(cmd command.Command) error {
+			b.Before(func(cmd string) {
 				logrus.Infof("Назначаем размер MTU: [%d], для созданного интерфейса: [%s]", mtu, iface.Name())
-				logrus.Infof("Run cmd: [%s]", cmd.String())
-				return nil
+				logrus.Infof("Run cmd: [%s]", cmd)
 			})
 			b.Cmd("ip", "link", "set", "dev", iface.Name(), "mtu", strconv.Itoa(int(mtu)))
 		}).
 		Add(func(b *command.Builder) {
-			b.Before(func(cmd command.Command) error {
-				logrus.Infof("Назначаем IP адрес: [%s], для созданного интерфейса: [%s]", subnet.IP, iface.Name())
-				logrus.Infof("Run cmd: [%s]", cmd.String())
-				return nil
+			b.Before(func(cmd string) {
+				logrus.Infof("Назначаем IP адрес: [%s], для созданного интерфейса: [%s]", tunCIDR, iface.Name())
+				logrus.Infof("Run cmd: [%s]", cmd)
 			})
-			b.Cmd("ip", "addr", "add", subnet.String(), "dev", iface.Name())
+			b.Cmd("ip", "addr", "add", tunCIDR, "dev", iface.Name())
 		}).
 		Add(func(b *command.Builder) {
-			b.Before(func(cmd command.Command) error {
+			b.Before(func(cmd string) {
 				logrus.Infof("Включаем созданный интерфейс")
-				logrus.Infof("Run cmd: [%s]", cmd.String())
-				return nil
+				logrus.Infof("Run cmd: [%s]", cmd)
 			})
 			b.Cmd("ip", "link", "set", "dev", iface.Name(), "up")
 		})

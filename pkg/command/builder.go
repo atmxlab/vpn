@@ -59,7 +59,7 @@ type Builder struct {
 	stdout io.Writer
 	stderr io.Writer
 
-	before func(cmd Command) error
+	before func(cmd string)
 	name   string
 	argv   []string
 }
@@ -81,7 +81,7 @@ func (b *Builder) Stdout(stdout io.Writer) *Builder {
 	return b
 }
 
-func (b *Builder) Before(fn func(cmd Command) error) *Builder {
+func (b *Builder) Before(fn func(cmd string)) *Builder {
 	b.before = fn
 	return b
 }
@@ -98,5 +98,6 @@ func (b *Builder) Build() *Command {
 		stderr: b.stderr,
 		name:   b.name,
 		args:   b.argv,
+		before: b.before,
 	}
 }

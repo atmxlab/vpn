@@ -2,8 +2,8 @@
   "bufferSize": 1500,
   "peerKeepAliveTTL": "10s",
   "tun": {
-    "subnetCIDR": "10.0.0.0/24",
-    "mtu": 1500,
+    "subnetCIDR": "10.0.0.1/24",
+    "mtu": 1471,
     "tunChanSize": 1000
   },
   "tunnel": {

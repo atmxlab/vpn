@@ -57,7 +57,7 @@ func New(
 		fmt.Sprintf("%s:%d", cfg.serverConfig.Tunnel.IP, cfg.serverConfig.Tunnel.Port),
 	)
 
-	tunSubnet, err := cfg.serverConfig.Tun.Subnet()
+	_, tunSubnet, err := cfg.serverConfig.Tun.CIDR()
 	require.NoError(t, err)
 
 	embeddedTunStub := stub.NewEmbeddedTun("TestTun", int(cfg.serverConfig.Tun.TunChanSize))

@@ -34,8 +34,7 @@ func main() {
 
 	serverAddr := resolveServerAddr(cfg)
 
-	tunConfigurator := configurator.NewTunConfigurator()
-	netConfigurator := configurator.NewNetConfigurator()
+	netConfigurator := configurator.NewConfigurator()
 
 	tunIPMask := ip.MaskFromIP(net.ParseIP(cfg.Tun.IPMask))
 
@@ -60,7 +59,7 @@ func main() {
 		Tunnel(tunl).
 		TunHandler(tunhandler.NewHandler(tunl, serverAddr)).
 		TunnelHandler(func(build *router.TunnelHandlerBuilder) {
-			build.ACK(tunnelhandler.NewACKHandler(tunConfigurator, netConfigurator, signaller, tunIPMask))
+			build.ACK(tunnelhandler.NewACKHandler(netConfigurator, netConfigurator, signaller, tunIPMask))
 			build.SYN(tunnelhandler.NewSYNHandler(tunl))
 			build.FIN(tunnelhandler.NewFINHandler(closer.NewCloser(cancel)))
 			build.PSH(tunnelhandler.NewPSHHandler(tn))

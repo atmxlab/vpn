@@ -29,18 +29,16 @@ func setupTun(mtu uint16) (*water.Interface, error) {
 		Stdout(stdout).
 		Stderr(stderr).
 		Add(func(b *command.Builder) {
-			b.Before(func(cmd command.Command) error {
+			b.Before(func(cmd string) {
 				logrus.Infof("Назначаем размер MTU: [%d], для созданного интерфейса: [%s]", mtu, iface.Name())
-				logrus.Infof("Run cmd: [%s]", cmd.String())
-				return nil
+				logrus.Infof("Run cmd: [%s]", cmd)
 			})
 			b.Cmd("ip", "link", "set", "dev", iface.Name(), "mtu", strconv.Itoa(int(mtu)))
 		}).
 		Add(func(b *command.Builder) {
-			b.Before(func(cmd command.Command) error {
+			b.Before(func(cmd string) {
 				logrus.Infof("Включаем созданный интерфейс")
-				logrus.Infof("Run cmd: [%s]", cmd.String())
-				return nil
+				logrus.Infof("Run cmd: [%s]", cmd)
 			})
 			b.Cmd("ip", "link", "set", "dev", iface.Name(), "up")
 		})

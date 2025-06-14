@@ -12,7 +12,7 @@ import (
 type Command struct {
 	stdout io.Writer
 	stderr io.Writer
-	before func(cmd *Command) error
+	before func(cmd string)
 	name   string
 	args   []string
 }
@@ -38,11 +38,7 @@ func (c *Command) String() string {
 }
 
 func (c *Command) Run() error {
-	if c.before != nil {
-		if err := c.before(c); err != nil {
-			return errors.Wrap(err, "before command")
-		}
-	}
+	c.before(c.String())
 
 	cmd := exec.Command(c.name, c.args...)
 	cmd.Stdout = c.stdout

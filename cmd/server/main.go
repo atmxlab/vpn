@@ -28,10 +28,10 @@ func main() {
 	cfg, err := jsonconfig.Load[config.ServerConfig](configPath)
 	cmd.Exitf(err, "jsonconfig.Load")
 
-	tunSubnet, err := cfg.Tun.Subnet()
-	cmd.Exitf(err, "cfg.Tun.Subnet")
+	tunIP, tunSubnet, err := cfg.Tun.CIDR()
+	cmd.Exitf(err, "cfg.Tun.CIDR")
 
-	embeddedTun, err := setupTun(tunSubnet, cfg.Tun.MTU)
+	embeddedTun, err := setupTun(tunIP, tunSubnet, cfg.Tun.MTU)
 	cmd.Exitf(err, "setupTun")
 
 	tn := tun.NewTun(embeddedTun)
@@ -41,7 +41,7 @@ func main() {
 	ipDistributor, err := ipdistributor.New(tunSubnet)
 	cmd.Exitf(err, "ipdistributor.New")
 
-	cmd.Exitf(setupOS(configurator.NewConfigurator(), cfg), "setupOS")
+	cmd.Exitf(setupOS(configurator.NewConfigurator()), "setupOS")
 
 	routerBuilder := router.NewBuilder()
 

@@ -19,6 +19,9 @@ func (r *Router) listenTun(ctx context.Context) error {
 			return errors.Wrap(err, "failed to read from tun")
 		}
 
+		payload := make([]byte, n)
+		copy(payload, buf[:n])
+
 		select {
 		case <-ctx.Done():
 			log.
@@ -40,13 +43,16 @@ func (r *Router) listenTunnel(ctx context.Context) error {
 			return errors.Wrap(err, "failed to read from tunnel")
 		}
 
+		payload := make([]byte, n)
+		copy(payload, buf[:n])
+
 		select {
 		case <-ctx.Done():
 			log.
 				WithError(ctx.Err()).
 				Warn("Stop listening because context canceled")
 			return ctx.Err()
-		case r.tunnelPackets <- protocol.UnmarshalTunnelPacket(addr, buf[:n]):
+		case r.tunnelPackets <- protocol.UnmarshalTunnelPacket(addr, payload):
 		}
 	}
 }

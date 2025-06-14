@@ -1,0 +1,186 @@
+@startuml
+
+skinparam ParticipantPadding 50
+skinparam BoxPadding 40
+
+!define THOST_IP 1.1.1.1
+
+!define CTUN0_IP 10.0.0.2
+!define CETH0_IP 192.168.0.10
+!define CISP_IP 22.22.22.22
+
+!define STUN0_IP 10.0.0.1
+!define SETH0_IP 33.33.33.33
+
+actor user
+
+box "Client Host" #LightBlue
+
+participant "tun0\n<color:blue>CTUN0_IP" as ctun0
+participant "vpn client" as vclient
+participant "udp tunnel" as ctunnel
+participant "net filter" as cnf
+participant "eth0\n<color:blue>CETH0_IP" as ceth0
+participant "router\ndefault gateway\n<color:blue>CISP_IP" as cisp
+
+end box
+
+box "Server Host" #LightGreen
+participant "eth0\n<color:green>SETH0_IP" as seth0
+participant "net filter" as snf
+participant "udp tunnel" as stunnel
+participant "vpn server" as vserver
+participant "tun0\n<color:green>STUN0_IP/24" as stun0
+participant "eth0\n<color:green>SETH0_IP" as seth02
+end box
+
+box "Target Host" #LightYellow
+participant "host\n<color:orange>THOST_IP" as thost
+end box
+
+user -> ctun0: send packet
+note left
+Operation:
+--
+ping -I tun0 THOST_IP
+
+--
+IP Packet
+--
+SRC: CTUN0_IP
+DST: THOST_IP
+end note
+
+vclient --> ctun0: Read packet
+
+vclient -> ctunnel: Write packet
+note left
+IP Packet:
+--
+SRC: CETH0_IP
+DST: SETH0_IP
+
+----
+Payload: [SRC: CTUN0_IP, DST: THOST_IP]
+end note
+
+
+cnf --> ctunnel: Read packet
+cnf -> ceth0: Send packet via default gateway
+
+ceth0 -> cisp: Send packet
+note left
+SRC: CETH0_IP
+DST: SETH0_IP
+end note
+
+cisp -> cisp: SNAT MASQUERADE
+note left
+CETH0_IP
+->
+CISP_IP
+end note
+
+cisp -> seth0: Route and delivery packet
+note left
+SRC: CISP_IP
+DST: SETH0_IP
+end note
+
+snf --> seth0: Read packet
+snf -> stunnel: Routing packet
+
+vserver --> stunnel: Read packet
+vserver -> vserver: Unwrap packet
+note left
+Original IP packet
+--
+SRC: CTUN0_IP
+DST: THOST_IP
+end note
+
+vserver -> stun0: Send original packet
+snf --> stun0: Read packet
+snf --> snf: SNAT MASQUERADE
+note left
+CTUN0_IP -> SETH0_IP
+end note
+snf -> seth02: Forwarding packet via default gateway
+note left
+SRC: SETH0_IP
+DST: THOST_IP
+end note
+
+seth02 -> thost: Send packet
+note left
+SRC: SETH0_IP
+DST: THOST_IP
+end note
+'RESPONSE
+
+thost -> seth02: send response packet
+note right
+SRC: THOST_IP
+DST: SETH0_IP
+end note
+
+snf --> seth02: Read packet
+
+snf --> snf: DNAT MASQUERADE
+note left
+SETH0_IP -> CTUN0_IP
+end note
+
+snf -> stun0: Forwarding packet via tun interface
+note left
+SRC: THOST_IP
+DST: CTUN0_IP
+end note
+
+vserver --> stun0: Read packet
+vserver -> vserver: Lookup vpn client tunnel by dst ip
+vserver -> stunnel: Write packet
+note right
+IP Packet:
+--
+SRC: SETH0_IP
+DST: CISP_IP
+
+----
+Payload: [SRC: THOST_IP, DST: CTUN0_IP]
+end note
+
+snf --> stunnel: Read packet
+snf -> seth0: Forwarding packet via default gateway
+
+seth0 -> cisp: Send packet
+note right
+SRC: SETH0_IP
+DST: CISP_IP
+end note
+
+cisp -> cisp: DNAT MASQUERADE
+note left
+CISP_IP -> CETH0_IP
+end note
+
+cisp -> ceth0: Send packet
+note right
+SRC: SETH0_IP
+DST: CETH0_IP
+end note
+
+cnf --> ceth0: Read packet
+cnf -> ctunnel: Routing packet
+vclient --> ctunnel: Read packet
+vclient -> vclient: Unwrap original response packet
+note left
+Original IP packet
+--
+SRC: THOST_IP
+DST: CTUN0_IP
+end note
+vclient -> ctun0: Write original response packet
+
+user --> ctun0: Read response packet
+@enduml
