@@ -10,7 +10,6 @@
 package mocks
 
 import (
-	context "context"
 	reflect "reflect"
 	time "time"
 
@@ -41,15 +40,15 @@ func (m *MockSignaller) EXPECT() *MockSignallerMockRecorder {
 }
 
 // WaitWithTimeout mocks base method.
-func (m *MockSignaller) WaitWithTimeout(arg0 context.Context, arg1 time.Duration) error {
+func (m *MockSignaller) WaitWithTimeout(arg0 time.Duration) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "WaitWithTimeout", arg0, arg1)
+	ret := m.ctrl.Call(m, "WaitWithTimeout", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // WaitWithTimeout indicates an expected call of WaitWithTimeout.
-func (mr *MockSignallerMockRecorder) WaitWithTimeout(arg0, arg1 any) *gomock.Call {
+func (mr *MockSignallerMockRecorder) WaitWithTimeout(arg0 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitWithTimeout", reflect.TypeOf((*MockSignaller)(nil).WaitWithTimeout), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "WaitWithTimeout", reflect.TypeOf((*MockSignaller)(nil).WaitWithTimeout), arg0)
 }

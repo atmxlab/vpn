@@ -14,6 +14,7 @@ import (
 	"github.com/atmxlab/vpn/internal/router"
 	tunhandler "github.com/atmxlab/vpn/internal/server/handlers/tun"
 	tunnelhandler "github.com/atmxlab/vpn/internal/server/handlers/tunnel"
+	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/atmxlab/vpn/test"
 	"github.com/atmxlab/vpn/test/stub"
 	"github.com/stretchr/testify/require"
@@ -37,7 +38,7 @@ func New(
 			BufferSize:       1500,
 			PeerKeepAliveTTL: config.Duration(10 * time.Second),
 			Tun: config.ServerTun{
-				SubnetCIDR:  "10.0.0.0/24",
+				SubnetCIDR:  "10.0.0.1/24",
 				MTU:         1500,
 				TunChanSize: 1000,
 			},
@@ -93,7 +94,9 @@ func New(
 	rt := routerBuilder.Build()
 
 	go func() {
-		require.NoError(t, rt.Run(ctx), "router.Run")
+		if localErr := rt.Run(ctx); errors.IsSomeBut(localErr, context.Canceled) {
+			require.NoError(t, localErr, "router.Run")
+		}
 	}()
 
 	return &engine{

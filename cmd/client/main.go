@@ -17,6 +17,7 @@ import (
 	"github.com/atmxlab/vpn/internal/pkg/tun"
 	"github.com/atmxlab/vpn/internal/pkg/tunnel"
 	"github.com/atmxlab/vpn/internal/router"
+	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/atmxlab/vpn/pkg/jsonconfig"
 	"github.com/atmxlab/vpn/pkg/signal"
 )
@@ -24,7 +25,7 @@ import (
 func main() {
 	defer cmd.Recover()
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := cmd.SignalCtx()
 	defer cancel()
 
 	const configPath = "./config/client.json"
@@ -62,7 +63,7 @@ func main() {
 		Tunnel(tunl).
 		TunHandler(tunhandler.NewHandler(tunl, serverAddr)).
 		TunnelHandler(func(build *router.TunnelHandlerBuilder) {
-			build.ACK(tunnelhandler.NewACKHandler(netConfigurator, netConfigurator, signaller, tunIPMask))
+			build.ACK(tunnelhandler.NewACKHandler(netConfigurator, signaller, tunIPMask))
 			build.SYN(tunnelhandler.NewSYNHandler(tunl))
 			build.FIN(tunnelhandler.NewFINHandler(closer.NewCloser(cancel)))
 			build.PSH(tunnelhandler.NewPSHHandler(tn))
@@ -75,5 +76,7 @@ func main() {
 
 	c := client.NewClient(rt, synAction, kpaAction, signaller)
 
-	cmd.Exitf(c.Run(ctx, cfg.Tunnel.ServerConnectionTimeout.ToDuration()), "client.Run")
+	if err = c.Run(ctx, cfg.Tunnel.ServerConnectionTimeout.ToDuration()); errors.IsSomeBut(err, context.Canceled) {
+		cmd.Exitf(err, "client.Run")
+	}
 }

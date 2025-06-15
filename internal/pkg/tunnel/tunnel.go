@@ -87,6 +87,8 @@ func (t *Tunnel) Write(tunnelPacket *protocol.TunnelPacket) (int, error) {
 
 // ReadFromWithContext - необходим, чтобы учитывать отмену контекста при чтении из тоннеля
 func (t *Tunnel) ReadFromWithContext(ctx context.Context, buf []byte) (int, net.Addr, error) {
+	l := logrus.WithField("Namespace", "TUNNEL")
+
 	type result struct {
 		n    int
 		addr net.Addr
@@ -108,12 +110,12 @@ func (t *Tunnel) ReadFromWithContext(ctx context.Context, buf []byte) (int, net.
 
 	select {
 	case <-ctx.Done():
-		logrus.Warnf("Context canceled: %v", ctx.Err())
+		l.Debug("Context canceled")
 		if err := t.conn.Close(); err != nil {
 			return 0, nil, errors.Join(err, ctx.Err())
 		}
 
-		logrus.Warn("Waiting ending read from TUNNEL...")
+		l.Debug("Waiting ending reading from TUNNEL...")
 		wg.Wait()
 
 		return 0, nil, ctx.Err()

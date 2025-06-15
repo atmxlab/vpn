@@ -17,7 +17,7 @@ func (r *Router) consumeTun(ctx context.Context) error {
 			log.
 				WithField("Len", len(packet.Payload())).
 				WithError(err).
-				Error("Failed to handle packet")
+				Warn("Failed to handle packet")
 		}
 	}
 
@@ -44,7 +44,7 @@ func (r *Router) consumeTunnel(ctx context.Context) error {
 		if err := handler.Handle(ctx, packet); err != nil {
 			log.
 				WithError(err).
-				Errorf("Failed to handle packet")
+				Warn("Failed to handle packet")
 		}
 	}
 

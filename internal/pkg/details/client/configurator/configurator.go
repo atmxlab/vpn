@@ -15,12 +15,6 @@ type Configurator struct {
 	stdout *bytes.Buffer
 }
 
-// TODO: возможно получится избавиться от этого
-
-func (c *Configurator) ConfigureRouting(ctx context.Context, subnet net.IPNet) error {
-	return nil
-}
-
 func NewConfigurator() *Configurator {
 	return &Configurator{
 		stderr: bytes.NewBuffer(nil),
@@ -28,42 +22,11 @@ func NewConfigurator() *Configurator {
 	}
 }
 
-func (c *Configurator) EnableIPForward() error {
-	b := c.createCommandBuilder().
-		Add(func(b *command.Builder) {
-			b.Before(func(cmd string) {
-				logrus.Infof("Enable IP forwarding")
-				logrus.Infof("Run cmd: [%s]", cmd)
-			})
-			b.Cmd("sysctl", "-w", "net.ipv4.ip_forward=1")
-		})
-
-	if err := c.runCommands(b); err != nil {
-		return errors.Wrap(err, "run commands")
-	}
-
-	return nil
-}
-
-func (c *Configurator) ConfigureFirewall(subnet net.IPNet) error {
-	b := c.createCommandBuilder()
-
-	if err := c.runCommands(b); err != nil {
-		return errors.Wrap(err, "run commands")
-	}
-
-	return nil
-}
-
-func (c *Configurator) SetDefaultRoute(subnet net.IPNet) error {
-	return nil
-}
-
 func (c *Configurator) ChangeTunAddr(_ context.Context, subnet net.IPNet) error {
 	b := c.createCommandBuilder().
 		Add(func(b *command.Builder) {
 			b.Before(func(cmd string) {
-				logrus.Infof("Add ip addr for tun0 interface")
+				logrus.Debug("Add ip addr for tun0 interface")
 				logrus.Infof("Run cmd: [%s]", cmd)
 			})
 			b.Cmd("ip", "addr", "add", subnet.String(), "dev", "tun0")

@@ -1,5 +1,0 @@
-package target
-
-func main() {
-
-}

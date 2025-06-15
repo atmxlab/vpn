@@ -9,8 +9,8 @@ import (
 )
 
 type TunnelConnection struct {
-	mu        sync.Mutex
-	closeOnce sync.Once
+	mu        *sync.Mutex
+	closeOnce *sync.Once
 
 	input chan *protocol.TunnelPacket
 
@@ -22,9 +22,11 @@ type TunnelConnection struct {
 
 func NewTunnelConnection(addr net.Addr, dataChanSize int) *TunnelConnection {
 	return &TunnelConnection{
-		input:  make(chan *protocol.TunnelPacket, dataChanSize),
-		output: make(chan *protocol.TunnelPacket, dataChanSize),
-		addr:   addr,
+		input:     make(chan *protocol.TunnelPacket, dataChanSize),
+		output:    make(chan *protocol.TunnelPacket, dataChanSize),
+		addr:      addr,
+		mu:        &sync.Mutex{},
+		closeOnce: &sync.Once{},
 	}
 }
 
@@ -64,10 +66,10 @@ func (t *TunnelConnection) LocalAddr() net.Addr {
 }
 
 func (t *TunnelConnection) Close() error {
-	t.mu.Lock()
-	defer t.mu.Unlock()
-	close(t.input)
-	close(t.output)
+	t.closeOnce.Do(func() {
+		close(t.input)
+		close(t.output)
+	})
 
 	return nil
 }

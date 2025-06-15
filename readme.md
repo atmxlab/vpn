@@ -1,47 +1,116 @@
-## VPN
+## About
 
-## Управление IP адресом клиента
+This is VPN project for learning
 
-Чтобы отправлять данные через **VPN** туннель,
-клиент должен получить выделенный внутренний **IP** адрес от сервера
+## Init
 
-Чтобы его получить для MVP предлагается использовать **http** запрос при клиента
+### Config
 
-### Как это будет работать:
+```bash
+cp .env.example .env 
+```
 
-- клиент стартует
-- клиент отправляет **http** запрос для получения выделенного **IP** адреса
-- после получения этого адреса, клиент может настроить свою сеть для маршрутизации трафика
-  через нужный **tun** интерфейс
+```bash 
+cp config/server.example.json config/server.json
+```
 
-### Что если поменялся IP адрес клиента?
+```bash 
+cp config/client.example.json config/client.json
+```
 
-#### Проблема:
+### Docker Environment
 
-Клиенты это обычные пользователи, которые чаще всего находятся за **NAT**-ом провайдера
-Соответственно у них динамический **IP** адрес
+```bash
+make test-env-up
+```
 
-Если их **IP** поменяется и сервер об этом ничего не будет знать, соединение перестанет работать,
-так как сервер будет пытаться слать пакеты на старый **IP** адрес
+### Run server
 
-#### Решение:
+```bash 
+make exec:server
+```
 
-Чтобы избежать потери соединения, клиент будет отправлять служебные **healthcheck** пакеты
-для того, чтобы актуализировать маппинг реального **IP** адреса клиента с **IP** адресом, который выделил сервер
+```bash 
+make run:server
+```
 
-### Что если роутер/провайдер сбрасывает UPD порт по таймауту?
+### Run client
 
-#### Проблема:
+```bash 
+make exec:client
+```
 
-UDP протокол не имеет соединения
-При передаче данных по **UDP** роутер/провайдер обновляет таблицу **NAT**, чтобы **UDP** трафик проходил к нужному узлу
+```bash 
+make run:client
+```
 
-Но роутер/провайдер не знают как долго они должны держать открытые порты именно для этого соединения
-Поэтому есть таймаут, который позволяет им закрывать соединение, если какое-то время не было трафика
+## Testing
 
-Как итог соединение может оборваться, если клиент перестал слать или получать пакеты
+### Unit & Acceptance
 
-#### Решение:
+```bash
+make test
+```
 
-Решают эту проблему тот же механизм **healthcheck**, которые будут использоваться для актуализации реального **IP**
-адреса
+### Manual
+
+#### Check traffic in target host
+
+```bash
+make exec:target
+
+tcpdump -p icmp
+```
+
+#### Send traffic to target host
+
+```bash
+make exec:client
+
+ping 172.16.0.20
+```
+
+#### Check
+
+- ping response
+- traffic incoming to target
+- client and server logs
+
+#### Other test methods
+
+Ping over concrete interface
+
+```bash
+ping -I tun0 1.1.1.1
+```
+
+Ping over concrete interface with packet len
+
+```bash
+ping -M do -I tun0 -s 1300 1.1.1.1
+```
+
+HTTP request over concrete interface
+
+```bash
+curl --interface tun0 --connect-timeout 3 ip-api.com
+```
+
+Check route
+
+```bash
+traceroute -i tun0 1.1.1.1
+```
+
+Check route using icmp
+
+```bash
+traceroute -i tun0 --icmp 1.1.1.1
+```
+
+## Action Points for upgrading
+
+- [ ] Develop network settings restore feature
+- [ ] Use library for network settings management instead of use cmd.Exec
+- [ ] Write tests for VPN client
+- [ ] Develop traffic encrypt feature

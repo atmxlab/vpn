@@ -26,7 +26,7 @@ func (r *Router) listenTun(ctx context.Context) error {
 		case <-ctx.Done():
 			log.
 				WithError(ctx.Err()).
-				Warn("Stop listening because context canceled")
+				Debug("Stop listening because context canceled")
 			return ctx.Err()
 		case r.tunPackets <- protocol.NewTunPacket(buf[:n]):
 		}
@@ -50,7 +50,7 @@ func (r *Router) listenTunnel(ctx context.Context) error {
 		case <-ctx.Done():
 			log.
 				WithError(ctx.Err()).
-				Warn("Stop listening because context canceled")
+				Debug("Stop listening because context canceled")
 			return ctx.Err()
 		case r.tunnelPackets <- protocol.UnmarshalTunnelPacket(addr, payload):
 		}

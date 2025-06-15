@@ -35,8 +35,7 @@ type Client struct {
 	kpaAction  KPAAction
 	connSignal Signaller
 
-	cancel context.CancelFunc
-	eg     *errgroup.Group
+	eg *errgroup.Group
 }
 
 func NewClient(
@@ -59,8 +58,6 @@ func (c *Client) Run(ctx context.Context, connTimeout time.Duration) (err error)
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 
-	c.cancel = cancel
-
 	c.eg, ctx = errgroup.WithContext(ctx)
 
 	defer func() {
@@ -71,59 +68,47 @@ func (c *Client) Run(ctx context.Context, connTimeout time.Duration) (err error)
 				Error("Client app error")
 		}
 
-		l.Info("Waiting app closing...")
+		l.Debug("Waiting app closing...")
 		if egErr := c.eg.Wait(); egErr != nil {
 			err = errors.Join(err, errors.Wrap(egErr, "error group wait"))
-			l.
-				WithError(egErr).
-				Error("Client app error after wait")
+			if !errors.Is(err, context.Canceled) {
+				l.
+					WithError(egErr).
+					Error("Client app error after wait")
+			}
 		}
 	}()
 
 	c.eg.Go(func() error {
-		defer l.Warn("Stopped router")
+		defer l.Debug("Stopped router")
 
-		l.Info("Starting router...")
+		l.Debug("Starting router...")
 		if err = c.router.Run(ctx); err != nil {
 			return errors.Wrap(err, "failed to start router")
 		}
 		return nil
 	})
 
-	l.Info("Init connection")
+	l.Debug("Init connection")
 	if err = c.synAction.Run(ctx); err != nil {
 		return errors.Wrap(err, "failed to start syn action")
 	}
 
-	l.Info("Waiting connection signal...")
+	l.Debug("Waiting connection signal...")
 	if err = c.connSignal.WaitWithTimeout(connTimeout); err != nil {
 		return errors.Wrap(err, "failed to wait for connection signal")
 	}
-	l.Info("Connected to server!")
+	l.Debug("Connected to server!")
 
 	c.eg.Go(func() error {
-		defer l.Warn("Stopped KPA action")
+		defer l.Debug("Stopped KPA action")
 
-		l.Info("Starting KPA action...")
+		l.Debug("Starting KPA action...")
 		if err = c.kpaAction.Run(ctx); err != nil {
 			return errors.Wrap(err, "failed to start kpa action")
 		}
 		return nil
 	})
-
-	return nil
-}
-
-func (c *Client) Close() error {
-	if c.cancel == nil {
-		return nil
-	}
-
-	c.cancel()
-
-	if err := c.eg.Wait(); err != nil {
-		return errors.Wrap(err, "error group wait")
-	}
 
 	return nil
 }

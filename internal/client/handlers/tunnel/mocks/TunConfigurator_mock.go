@@ -40,7 +40,7 @@ func (m *MockTunConfigurator) EXPECT() *MockTunConfiguratorMockRecorder {
 	return m.recorder
 }
 
-// ChangeAddr mocks base method.
+// ChangeTunAddr mocks base method.
 func (m *MockTunConfigurator) ChangeTunAddr(arg0 context.Context, arg1 net.IPNet) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "ChangeTunAddr", arg0, arg1)
@@ -48,8 +48,8 @@ func (m *MockTunConfigurator) ChangeTunAddr(arg0 context.Context, arg1 net.IPNet
 	return ret0
 }
 
-// ChangeAddr indicates an expected call of ChangeAddr.
-func (mr *MockTunConfiguratorMockRecorder) ChangeAddr(arg0, arg1 any) *gomock.Call {
+// ChangeTunAddr indicates an expected call of ChangeTunAddr.
+func (mr *MockTunConfiguratorMockRecorder) ChangeTunAddr(arg0, arg1 any) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ChangeTunAddr", reflect.TypeOf((*MockTunConfigurator)(nil).ChangeTunAddr), arg0, arg1)
 }

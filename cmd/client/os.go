@@ -30,11 +30,12 @@ func setupOS(serverIP, gatewayIP net.IP) error {
 				logrus.Debug("Add route for tunnel")
 				logrus.Infof("Run cmd: [%s]", cmd)
 			})
-			b.Cmd("ip", "route", "add", serverIP.String(), "via", gatewayIP.String(), "dev", "eth0")
+			b.Cmd("ip", "route", "replace", serverIP.String(), "via", gatewayIP.String(), "dev", "eth0")
 		})
 
 	if err := commandBuilder.BuildAndRun(); err != nil {
 		logrus.Errorf("Stdout: %s", stdout.String())
+		logrus.Errorf("Stderr: %s", stderr.String())
 		return errors.Wrap(err, "failed to build commands")
 	}
 

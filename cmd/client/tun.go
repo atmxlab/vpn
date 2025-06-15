@@ -30,14 +30,14 @@ func setupTun(mtu uint16) (*water.Interface, error) {
 		Stderr(stderr).
 		Add(func(b *command.Builder) {
 			b.Before(func(cmd string) {
-				logrus.Infof("Назначаем размер MTU: [%d], для созданного интерфейса: [%s]", mtu, iface.Name())
+				logrus.Debug("Set MTU for tun interface")
 				logrus.Infof("Run cmd: [%s]", cmd)
 			})
 			b.Cmd("ip", "link", "set", "dev", iface.Name(), "mtu", strconv.Itoa(int(mtu)))
 		}).
 		Add(func(b *command.Builder) {
 			b.Before(func(cmd string) {
-				logrus.Infof("Включаем созданный интерфейс")
+				logrus.Debug("Up tun interface")
 				logrus.Infof("Run cmd: [%s]", cmd)
 			})
 			b.Cmd("ip", "link", "set", "dev", iface.Name(), "up")
@@ -45,6 +45,7 @@ func setupTun(mtu uint16) (*water.Interface, error) {
 
 	if err = commandBuilder.BuildAndRun(); err != nil {
 		logrus.Errorf("Stdout: %s", stdout.String())
+		logrus.Errorf("Stderr: %s", stderr.String())
 		return nil, errors.Wrap(err, "failed to build commands")
 	}
 

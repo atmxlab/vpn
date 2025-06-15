@@ -7,7 +7,8 @@ import (
 )
 
 type EmbeddedTun struct {
-	mu sync.Mutex
+	mu        *sync.Mutex
+	closeOnce *sync.Once
 
 	input chan []byte
 
@@ -19,9 +20,11 @@ type EmbeddedTun struct {
 
 func NewEmbeddedTun(name string, dataChanSize int) *EmbeddedTun {
 	return &EmbeddedTun{
-		input:  make(chan []byte, dataChanSize),
-		output: make(chan []byte, dataChanSize),
-		name:   name,
+		input:     make(chan []byte, dataChanSize),
+		output:    make(chan []byte, dataChanSize),
+		name:      name,
+		closeOnce: &sync.Once{},
+		mu:        &sync.Mutex{},
 	}
 }
 
@@ -50,8 +53,11 @@ func (e *EmbeddedTun) WriteToInput(p []byte) (n int, err error) {
 }
 
 func (e *EmbeddedTun) Close() error {
-	close(e.input)
-	close(e.output)
+	e.closeOnce.Do(func() {
+		close(e.input)
+		close(e.output)
+	})
+
 	return nil
 }
 

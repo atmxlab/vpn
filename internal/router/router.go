@@ -77,9 +77,9 @@ func (r *Router) Run(ctx context.Context) error {
 
 	r.eg.Go(func() error {
 		defer close(r.tunPackets)
-		defer log.Warn("Stop listen tun")
+		defer log.Debug("Stop tun listening")
 
-		log.Info("Listen tun...")
+		log.Debug("Start tun listening")
 		if err := r.listenTun(ctx); err != nil {
 			return errors.Wrap(err, "listen TUN")
 		}
@@ -89,9 +89,9 @@ func (r *Router) Run(ctx context.Context) error {
 
 	r.eg.Go(func() error {
 		defer close(r.tunnelPackets)
-		defer log.Warn("Stop listen tunnel")
+		defer log.Debug("Stop tunnel listening")
 
-		log.Info("Listen tunnel...")
+		log.Debug("Start tunnel listening")
 		if err := r.listenTunnel(ctx); err != nil {
 			return errors.Wrap(err, "listen Tunnel")
 		}
@@ -99,9 +99,9 @@ func (r *Router) Run(ctx context.Context) error {
 	})
 
 	r.eg.Go(func() error {
-		defer log.Warn("Stop consume tun")
+		defer log.Debug("Stop tun consuming")
 
-		log.Info("Consume tun...")
+		log.Debug("Start tun consuming.")
 		if err := r.consumeTun(ctx); err != nil {
 			return errors.Wrap(err, "tun consumer")
 		}
@@ -109,16 +109,15 @@ func (r *Router) Run(ctx context.Context) error {
 	})
 
 	r.eg.Go(func() error {
-		defer log.Warn("Stop consume tunnel")
+		defer log.Debug("Stop tunnel consuming")
 
-		log.Info("Consume tunnel...")
+		log.Debug("Start tunnel consuming")
 		if err := r.consumeTunnel(ctx); err != nil {
 			return errors.Wrap(err, "tunnel consumer")
 		}
 		return nil
 	})
 
-	log.Info("Wait...")
 	if err := r.eg.Wait(); err != nil {
 		return errors.Wrap(err, "error group wait")
 	}

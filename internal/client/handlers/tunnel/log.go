@@ -6,9 +6,15 @@ import (
 )
 
 func log(packet *protocol.TunnelPacket) *logrus.Entry {
-	return logrus.
-		WithField("Namespace", "TUNNEL|HANDLER").
-		WithField("Flag", packet.Header().Flag()).
-		WithField("Len", packet.Payload().Len()).
-		WithField("PacketAddr", packet.Addr())
+	l := logrus.
+		WithField("Namespace", "TUNNEL|HANDLER")
+
+	if packet != nil {
+		l.
+			WithField("Flag", packet.Header().Flag()).
+			WithField("Len", packet.Payload().Len()).
+			WithField("PacketAddr", packet.Addr())
+	}
+
+	return l
 }

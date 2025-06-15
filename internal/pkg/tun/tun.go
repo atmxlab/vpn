@@ -43,6 +43,8 @@ func (t *Tun) Write(buf []byte) (int, error) {
 
 // ReadWithContext - необходим, чтобы учитывать отмену контекста при чтении из потока
 func (t *Tun) ReadWithContext(ctx context.Context, buf []byte) (int, error) {
+	l := logrus.WithField("Namespace", "TUN")
+
 	type result struct {
 		n   int
 		err error
@@ -62,12 +64,12 @@ func (t *Tun) ReadWithContext(ctx context.Context, buf []byte) (int, error) {
 
 	select {
 	case <-ctx.Done():
-		logrus.Warnf("Context canceled: %v", ctx.Err())
+		l.Debug("Context canceled")
 		if err := t.tun.Close(); err != nil {
 			return 0, errors.Join(err, ctx.Err())
 		}
 
-		logrus.Warn("Waiting ending read from TUN...")
+		l.Debug("Waiting ending reading from TUN...")
 		wg.Wait()
 
 		return 0, ctx.Err()

@@ -5,7 +5,6 @@ import (
 
 	"github.com/atmxlab/vpn/cmd"
 	"github.com/atmxlab/vpn/internal/config"
-	"github.com/atmxlab/vpn/internal/pkg/details/server/configurator"
 	"github.com/atmxlab/vpn/internal/pkg/ipdistributor"
 	_ "github.com/atmxlab/vpn/internal/pkg/logger"
 	"github.com/atmxlab/vpn/internal/pkg/peermanager"
@@ -14,13 +13,14 @@ import (
 	"github.com/atmxlab/vpn/internal/router"
 	tunhandler "github.com/atmxlab/vpn/internal/server/handlers/tun"
 	tunnelhandler "github.com/atmxlab/vpn/internal/server/handlers/tunnel"
+	"github.com/atmxlab/vpn/pkg/errors"
 	"github.com/atmxlab/vpn/pkg/jsonconfig"
 )
 
 func main() {
 	defer cmd.Recover()
 
-	ctx, cancel := context.WithCancel(context.Background())
+	ctx, cancel := cmd.SignalCtx()
 	defer cancel()
 
 	const configPath = "./config/server.json"
@@ -41,7 +41,7 @@ func main() {
 	ipDistributor, err := ipdistributor.New(tunSubnet)
 	cmd.Exitf(err, "ipdistributor.New")
 
-	cmd.Exitf(setupOS(configurator.NewConfigurator()), "setupOS")
+	cmd.Exitf(setupOS(), "setupOS")
 
 	routerBuilder := router.NewBuilder()
 
@@ -64,5 +64,7 @@ func main() {
 
 	rt := routerBuilder.Build()
 
-	cmd.Exitf(rt.Run(ctx), "router.Run")
+	if err = rt.Run(ctx); errors.IsSomeBut(err, context.Canceled) {
+		cmd.Exitf(err, "router.Run")
+	}
 }
