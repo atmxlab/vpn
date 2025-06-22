@@ -111,6 +111,6 @@ traceroute -i tun0 --icmp 1.1.1.1
 ## Action Points for upgrading
 
 - [ ] Develop network settings restore feature
-- [ ] Use library for network settings management instead of use cmd.Exec
+- [ ] Use a library for network settings management instead of use cmd.Exec
 - [ ] Write tests for VPN client
 - [ ] Develop traffic encrypt feature
